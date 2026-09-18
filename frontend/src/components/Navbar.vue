@@ -173,13 +173,22 @@
           </div>
 
           <!-- Footer Dropdown -->
-          <div class="p-2.5 bg-slate-50 border-t border-slate-100 text-center">
+          <div class="p-2.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs">
+            <router-link 
+              to="/maintenance-calendar" 
+              @click="isDropdownOpen = false"
+              class="text-[11px] font-bold text-teal-700 hover:text-teal-800 inline-flex items-center gap-1 cursor-pointer"
+            >
+              <CalendarDays class="w-3.5 h-3.5" />
+              <span>Kalender Jadwal</span>
+            </router-link>
+
             <router-link 
               to="/" 
               @click="isDropdownOpen = false"
               class="text-[11px] font-bold text-emerald-600 hover:text-emerald-700 inline-flex items-center gap-1 cursor-pointer"
             >
-              <span>Buka Dashboard Analitik</span>
+              <span>Dashboard</span>
               <span>&rarr;</span>
             </router-link>
           </div>
@@ -209,7 +218,7 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import { 
   Menu, QrCode, LogOut, Bell, Volume2, VolumeX, 
-  AlertTriangle, Award, CalendarCheck, Wrench, CheckCircle2 
+  AlertTriangle, Award, CalendarCheck, CalendarDays, Wrench, CheckCircle2 
 } from 'lucide-vue-next';
 import { useAuthStore } from '../stores/authStore';
 import { useNotificationStore } from '../stores/notificationStore';

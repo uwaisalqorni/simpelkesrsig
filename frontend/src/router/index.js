@@ -10,6 +10,7 @@ import CreateTicketView from '../views/tickets/CreateTicketView.vue';
 import TicketDetailView from '../views/tickets/TicketDetailView.vue';
 import PreventiveView from '../views/maintenance/PreventiveView.vue';
 import CalibrationView from '../views/maintenance/CalibrationView.vue';
+import MaintenanceCalendarView from '../views/maintenance/MaintenanceCalendarView.vue';
 import SparepartsView from '../views/spareparts/SparepartsView.vue';
 import RoomsView from '../views/rooms/RoomsView.vue';
 import UsersView from '../views/users/UsersView.vue';
@@ -70,6 +71,12 @@ const routes = [
     path: '/calibrations',
     name: 'Calibrations',
     component: CalibrationView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/maintenance-calendar',
+    name: 'MaintenanceCalendar',
+    component: MaintenanceCalendarView,
     meta: { requiresAuth: true }
   },
   {

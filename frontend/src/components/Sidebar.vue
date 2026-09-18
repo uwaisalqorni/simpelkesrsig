@@ -126,6 +126,16 @@
         </span>
       </router-link>
 
+      <router-link 
+        to="/maintenance-calendar" 
+        @click="handleNavClick"
+        class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all"
+        :class="[$route.path === '/maintenance-calendar' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white']"
+      >
+        <CalendarDays class="w-5 h-5 text-teal-400" />
+        <span class="flex-1">Kalender Pemeliharaan</span>
+      </router-link>
+
       <template v-if="authStore.isAdmin || authStore.isTeknisi">
         <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-3 pt-4 mb-2">Logistik & Master</div>
 
@@ -222,7 +232,7 @@
 <script setup>
 import { 
   Activity, X, LayoutDashboard, Stethoscope, Wrench, 
-  PlusCircle, CalendarCheck, Award, Boxes, DoorOpen,
+  PlusCircle, CalendarCheck, CalendarDays, Award, Boxes, DoorOpen,
   FileBarChart, Users, ShieldCheck, Sliders, LogOut
 } from 'lucide-vue-next';
 import { useAuthStore } from '../stores/authStore';

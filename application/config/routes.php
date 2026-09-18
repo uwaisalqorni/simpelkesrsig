@@ -112,6 +112,9 @@ $route['api/calibrations/update/(:num)']   = 'api/calibrations/update/$1';
 $route['api/calibrations/delete/(:num)']   = 'api/calibrations/delete/$1';
 $route['api/calibrations/(:num)']          = 'api/calibrations/show/$1';
 
+// API Calendar
+$route['api/calendar/events'] = 'api/calendar/events';
+
 // API Dashboard
 $route['api/dashboard/summary'] = 'api/dashboard/summary';
 

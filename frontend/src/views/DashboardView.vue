@@ -152,10 +152,19 @@
               </button>
             </div>
 
-            <!-- Link ke Menu Kalibrasi -->
+            <!-- Link ke Kalender & Kalibrasi -->
+            <router-link 
+              to="/maintenance-calendar" 
+              class="px-3 py-1.5 text-xs font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 rounded-xl transition-colors inline-flex items-center gap-1 cursor-pointer"
+              title="Buka Kalender Pemeliharaan Alkes"
+            >
+              <CalendarDays class="w-3.5 h-3.5" />
+              <span>Kalender</span>
+            </router-link>
+
             <router-link 
               to="/calibrations" 
-              class="px-3 py-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-xl transition-colors inline-flex items-center gap-1"
+              class="px-3 py-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-xl transition-colors inline-flex items-center gap-1 cursor-pointer"
             >
               <span>Kelola Kalibrasi</span>
               <ArrowRight class="w-3.5 h-3.5" />
@@ -416,7 +425,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { 
   Sparkles, PlusCircle, CheckCircle2, Wrench, AlertTriangle, 
-  Clock, Stethoscope, Award, AlertOctagon, ArrowRight 
+  Clock, Stethoscope, Award, AlertOctagon, ArrowRight, CalendarDays 
 } from 'lucide-vue-next';
 import { useAuthStore } from '../stores/authStore';
 import axiosClient from '../api/axiosClient';
