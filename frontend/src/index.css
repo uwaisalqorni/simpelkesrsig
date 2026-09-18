@@ -1,0 +1,95 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-900;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* ==========================================================================
+   OFFICIAL HOSPITAL PRINT STYLES
+   Ensures headers, navbars, sidebars, and web chrome are completely stripped.
+   ========================================================================== */
+@media print {
+  /* Force hide all navigation chrome, modals, and web elements */
+  header,
+  aside,
+  footer,
+  nav,
+  .print\:hidden,
+  [class*="print:hidden"] {
+    display: none !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    visibility: hidden !important;
+  }
+
+  /* Reset layout for paper printing */
+  html, body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    font-size: 10.5pt !important;
+    line-height: 1.4 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Remove dropshadows and web UI outlines */
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  @page {
+    size: auto;
+    margin: 10mm 14mm 10mm 14mm;
+  }
+
+  /* Prevent awkward page cuts inside tables or sections */
+  table, tr, td, th, .printable-card {
+    page-break-inside: avoid;
+  }
+
+  /* Stiker Label QR Alkes - Pas 1 Halaman Tanpa Overflow */
+  .qr-sticker-card {
+    display: block !important;
+    margin: 6mm auto !important;
+    page-break-inside: avoid !important;
+    page-break-before: avoid !important;
+    page-break-after: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .print\:block {
+    display: block !important;
+  }
+}
+

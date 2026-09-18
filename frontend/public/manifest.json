@@ -1,0 +1,25 @@
+{
+  "name": "SIMPELKES - RS Islam Gondanglegi",
+  "short_name": "SIMPELKES",
+  "description": "Sistem Informasi Manajemen Pemeliharaan Fasilitas & Alat Medis Rumah Sakit",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#059669",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "logo.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
