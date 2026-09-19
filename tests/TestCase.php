@@ -157,7 +157,16 @@ class TestCase {
     public function getDb() {
         static $db = null;
         if ($db === null) {
-            $db = new mysqli('localhost', 'root', 'bismillah', 'simpelkesrsig');
+            if (!function_exists('env')) {
+                require_once dirname(__DIR__) . '/application/core/Env.php';
+                Env::load(dirname(__DIR__) . '/.env');
+            }
+            $host = env('DB_HOST', 'localhost');
+            $user = env('DB_USER', 'root');
+            $pass = env('DB_PASS', '');
+            $name = env('DB_NAME', 'simpelkesrsig');
+
+            $db = new mysqli($host, $user, $pass, $name);
             if ($db->connect_error) {
                 throw new Exception('Database connection error: ' . $db->connect_error);
             }
