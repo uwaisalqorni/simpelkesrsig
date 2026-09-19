@@ -29,7 +29,7 @@ class Preventive_model extends CI_Model {
     }
 
     public function get_all($filters = [], $limit = null, $offset = null) {
-        $this->db->select('ps.*, e.asset_code, e.name as equipment_name, e.brand as equipment_brand, e.model_type as equipment_model, e.serial_number, r.name as room_name, r.code as room_code, u.full_name as technician_name');
+        $this->db->select('ps.*, e.asset_code, e.name as equipment_name, e.brand, e.brand as equipment_brand, e.model_type, e.model_type as equipment_model, e.serial_number, r.name as room_name, r.code as room_code, COALESCE(NULLIF(ps.technician_name, ""), u.full_name) as technician_name');
         $this->db->from('preventive_schedules ps');
         $this->db->join('medical_equipment e', 'e.id = ps.equipment_id', 'left');
         $this->db->join('rooms r', 'r.id = e.room_id', 'left');
@@ -54,7 +54,7 @@ class Preventive_model extends CI_Model {
     }
 
     public function find_by_id($id) {
-        $this->db->select('ps.*, e.asset_code, e.name as equipment_name, e.brand, e.model_type, e.serial_number, e.room_id, r.name as room_name, u.full_name as technician_name');
+        $this->db->select('ps.*, e.asset_code, e.name as equipment_name, e.brand, e.brand as equipment_brand, e.model_type, e.model_type as equipment_model, e.serial_number, e.room_id, r.name as room_name, COALESCE(NULLIF(ps.technician_name, ""), u.full_name) as technician_name');
         $this->db->from('preventive_schedules ps');
         $this->db->join('medical_equipment e', 'e.id = ps.equipment_id', 'left');
         $this->db->join('rooms r', 'r.id = e.room_id', 'left');

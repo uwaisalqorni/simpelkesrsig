@@ -81,4 +81,41 @@ class MultiTenantTest extends TestCase {
         $this->assertEquals(403, $hack['code'], 'Admin faskes biasa harus diblokir dari membuat akun super_admin (HTTP 403)');
         $this->assertFalse($hack['body']['success']);
     }
+
+    public function test_preventive_schedules_isolation_between_tenants() {
+        $db = $this->getDb();
+        // Buat jadwal khusus di Tenant 1 (RSIG)
+        $q = $db->query("SELECT id FROM medical_equipment WHERE tenant_id = 1 LIMIT 1");
+        $eqId = (int)$q->fetch_assoc()['id'];
+
+        $db->query("INSERT INTO preventive_schedules (tenant_id, equipment_id, scheduled_date, frequency, status, notes)
+                    VALUES (1, {$eqId}, CURDATE(), 'quarterly', 'pending', '[ISOLATION-TEST-RSIG]')");
+        $schId = (int)$db->insert_id;
+
+        // 1. Admin KPSM (Tenant 2) ambil list jadwal preventif -> Jadwal RSIG TIDAK boleh muncul
+        $kpsmList = $this->api('GET', '/preventive/schedules', null, $this->kpsmToken);
+        $this->assertEquals(200, $kpsmList['code']);
+        $items = $kpsmList['body']['data'] ?? [];
+        if (isset($items['items'])) $items = $items['items'];
+        $scheduleIds = array_column($items, 'id');
+        $this->assertFalse(in_array($schId, $scheduleIds), 'Jadwal preventif Tenant 1 tidak boleh bocor ke daftar jadwal Tenant 2');
+
+        // 2. Admin KPSM (Tenant 2) mencoba langsung akses ID jadwal Tenant 1 -> harus 404 (Not Found / Hidden)
+        $kpsmDetail = $this->api('GET', "/preventive/{$schId}", null, $this->kpsmToken);
+        $this->assertEquals(404, $kpsmDetail['code'], 'Tenant 2 tidak boleh dapat melihat detail jadwal milik Tenant 1 (harus 404)');
+
+        // 3. Admin KPSM mencoba mengeksekusi / menyelesaikan jadwal milik Tenant 1 -> harus 404
+        $kpsmComplete = $this->api('POST', "/preventive/complete/{$schId}", [
+            'final_condition' => 'laik_pakai',
+            'technician_name' => 'Hacker KPSM'
+        ], $this->kpsmToken);
+        $this->assertEquals(404, $kpsmComplete['code'], 'Tenant 2 tidak boleh dapat mengeksekusi jadwal milik Tenant 1 (harus 404)');
+
+        // 4. Admin RSIG (Tenant 1 yang sah) dapat melihat detailnya
+        $rsigDetail = $this->api('GET', "/preventive/{$schId}", null, $this->rsigToken);
+        $this->assertEquals(200, $rsigDetail['code'], 'Tenant 1 yang sah harus bisa mengakses jadwal miliknya');
+
+        // Bersihkan
+        $db->query("DELETE FROM preventive_schedules WHERE id = {$schId}");
+    }
 }

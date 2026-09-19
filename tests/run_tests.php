@@ -25,6 +25,7 @@ require_once __DIR__ . '/WorkOrdersTest.php';
 require_once __DIR__ . '/TelegramServiceTest.php';
 require_once __DIR__ . '/SecurityTest.php';
 require_once __DIR__ . '/SettingsTest.php';
+require_once __DIR__ . '/PreventiveAdvancedTest.php';
 
 $allSuites = [
     'AuthTest',
@@ -32,7 +33,8 @@ $allSuites = [
     'WorkOrdersTest',
     'TelegramServiceTest',
     'SecurityTest',
-    'SettingsTest'
+    'SettingsTest',
+    'PreventiveAdvancedTest'
 ];
 
 $filterSuite = $argv[1] ?? null;
