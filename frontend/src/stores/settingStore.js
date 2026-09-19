@@ -9,6 +9,8 @@ export const useSettingStore = defineStore('setting', {
       hospital_address: 'Jl. Hayam Wuruk No. 123, Gondanglegi, Malang',
       hospital_phone: '(0341) 879222',
       hospital_city: 'Gondanglegi',
+      head_ipsrs_name: 'Ahmad Elektromedik, S.Tr.Kes',
+      head_ipsrs_nip: '19850712 201001 1 002',
       hospital_logo: null,
       telegram_bot_token: '',
       telegram_chat_id: '',
@@ -29,6 +31,8 @@ export const useSettingStore = defineStore('setting', {
     hospitalAddress: (state) => state.settings?.hospital_address || 'Jl. Hayam Wuruk No. 123, Gondanglegi, Malang',
     hospitalPhone: (state) => state.settings?.hospital_phone || '(0341) 879222',
     hospitalCity: (state) => state.settings?.hospital_city || 'Gondanglegi',
+    headIpsrsName: (state) => state.settings?.head_ipsrs_name || 'Ahmad Elektromedik, S.Tr.Kes',
+    headIpsrsNip: (state) => state.settings?.head_ipsrs_nip || '19850712 201001 1 002',
     telegramBotToken: (state) => state.settings?.telegram_bot_token || '',
     telegramChatId: (state) => state.settings?.telegram_chat_id || '',
     hospitalLogoUrl: (state) => {

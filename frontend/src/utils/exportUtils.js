@@ -88,15 +88,19 @@ export const exportEquipmentToExcel = (items, hospitalInfo = {}) => {
   });
 
   // Append signature rows at bottom
+  const headName = hospitalInfo.head_name || hospitalInfo.headIpsrsName || '......................................................';
+  const headNip = hospitalInfo.head_nip || hospitalInfo.headIpsrsNip || '............................................';
+  const city = hospitalInfo.city || hospitalInfo.hospitalCity || 'Gondanglegi';
+
   data.push(['']);
   data.push(['']);
-  data.push(['', '', '', '', '', '', '', '', '', 'Gondanglegi, ' + printTime.split(' ')[0]]);
+  data.push(['', '', '', '', '', '', '', '', '', `${city}, ` + printTime.split(' ')[0]]);
   data.push(['', '', '', '', '', '', '', '', '', 'Mengetahui,']);
   data.push(['', '', '', '', '', '', '', '', '', 'Kepala Instalasi Pemeliharaan Sarana (IPSRS)']);
   data.push(['']);
   data.push(['']);
-  data.push(['', '', '', '', '', '', '', '', '', '( ...................................................... )']);
-  data.push(['', '', '', '', '', '', '', '', '', 'NIP/NIK: ............................................']);
+  data.push(['', '', '', '', '', '', '', '', '', `( ${headName} )`]);
+  data.push(['', '', '', '', '', '', '', '', '', `NIP/NIK: ${headNip}`]);
 
   const ws = XLSX.utils.aoa_to_sheet(data);
 
@@ -272,12 +276,16 @@ export const exportEquipmentToPDF = (items, hospitalInfo = {}) => {
 
   // Signature Block on the last page
   const finalY = doc.lastAutoTable.finalY + 8;
+  const headName = hospitalInfo.head_name || hospitalInfo.headIpsrsName || null;
+  const headNip = hospitalInfo.head_nip || hospitalInfo.headIpsrsNip || null;
+  const city = hospitalInfo.city || hospitalInfo.hospitalCity || 'Gondanglegi';
+
   if (finalY < pageHeight - 35) {
-    drawSignatureBlock(doc, pageWidth, finalY, printTime.split(' ')[0]);
+    drawSignatureBlock(doc, pageWidth, finalY, printTime.split(' ')[0], headName, headNip, city);
   } else {
     // Add page for signature if table reaches the bottom
     doc.addPage();
-    drawSignatureBlock(doc, pageWidth, 25, printTime.split(' ')[0]);
+    drawSignatureBlock(doc, pageWidth, 25, printTime.split(' ')[0], headName, headNip, city);
   }
 
   const fileName = `Laporan_Inventaris_Alkes_RSIG_${getTimestampString()}.pdf`;
@@ -405,20 +413,22 @@ export const exportReportsToExcel = (recap, hospitalInfo = {}) => {
   XLSX.writeFile(wb, fileName);
 };
 
-const drawSignatureBlock = (doc, pageWidth, startY, dateStr) => {
+const drawSignatureBlock = (doc, pageWidth, startY, dateStr, headName = null, headNip = null, city = 'Gondanglegi') => {
   const rightColX = pageWidth - 65;
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
   doc.setTextColor(51, 65, 85);
 
-  doc.text(`Gondanglegi, ${dateStr}`, rightColX, startY);
+  doc.text(`${city}, ${dateStr}`, rightColX, startY);
   doc.text('Mengetahui,', rightColX, startY + 4.5);
   doc.setFont('helvetica', 'bold');
   doc.text('Kepala Instalasi Pemeliharaan Sarana (IPSRS)', rightColX, startY + 9);
 
   // Line for sign
   doc.setFont('helvetica', 'normal');
-  doc.text('( .............................................................. )', rightColX, startY + 28);
-  doc.text('NIP / NIK: ...............................................', rightColX, startY + 32.5);
+  const nameToPrint = headName ? `( ${headName} )` : '( .............................................................. )';
+  const nipToPrint = headNip ? `NIP / NIK: ${headNip}` : 'NIP / NIK: ...............................................';
+  doc.text(nameToPrint, rightColX, startY + 28);
+  doc.text(nipToPrint, rightColX, startY + 32.5);
 };
 

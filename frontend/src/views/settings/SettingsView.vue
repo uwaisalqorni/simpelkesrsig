@@ -120,6 +120,41 @@
                 class="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition resize-none"
               ></textarea>
             </div>
+
+            <!-- Pejabat Pengesahan (Kepala Instalasi IPSRS) -->
+            <div class="pt-4 border-t border-slate-100">
+              <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                <UserCheck class="w-3.5 h-3.5 text-emerald-600" />
+                Pejabat Pengesahan (Kepala Instalasi IPSRS)
+              </h3>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                    Nama Kepala Instalasi <span class="text-rose-500">*</span>
+                  </label>
+                  <input 
+                    v-model="form.head_ipsrs_name" 
+                    type="text" 
+                    placeholder="Contoh: Ahmad Elektromedik, S.Tr.Kes"
+                    class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition"
+                  />
+                  <p class="text-[11px] text-slate-400 mt-1">Dicantumkan pada kolom tanda tangan "Mengetahui" di seluruh laporan resmi.</p>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                    NIP / NIK Kepala Instalasi
+                  </label>
+                  <input 
+                    v-model="form.head_ipsrs_nip" 
+                    type="text" 
+                    placeholder="Contoh: 19850712 201001 1 002"
+                    class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition"
+                  />
+                  <p class="text-[11px] text-slate-400 mt-1">Nomor Induk Pegawai / Karyawan penandatangan.</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -350,7 +385,8 @@
                 <div>{{ form.hospital_city || 'Gondanglegi' }}, {{ new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) }}</div>
                 <div class="font-bold mt-0.5">Kepala {{ form.hospital_subtitle || 'IPSRS' }}</div>
                 <div class="h-8"></div>
-                <div class="font-bold underline text-slate-900">Ahmad Elektromedik, A.Md.T</div>
+                <div class="font-bold underline text-slate-900">{{ form.head_ipsrs_name || 'Ahmad Elektromedik, S.Tr.Kes' }}</div>
+                <div v-if="form.head_ipsrs_nip" class="text-[8px] text-slate-500">NIP: {{ form.head_ipsrs_nip }}</div>
               </div>
             </div>
           </div>
@@ -381,7 +417,7 @@
 import { ref, reactive, onMounted } from 'vue';
 import { 
   Building2, Save, Loader2, CheckCircle2, AlertCircle, 
-  X, Sliders, Image, Upload, Eye, EyeOff, Sparkles, Send, HelpCircle 
+  X, Sliders, Image, Upload, Eye, EyeOff, Sparkles, Send, HelpCircle, UserCheck 
 } from 'lucide-vue-next';
 import { useSettingStore } from '../../stores/settingStore';
 import { validateFile } from '../../utils/fileValidation';
@@ -394,6 +430,8 @@ const form = reactive({
   hospital_address: '',
   hospital_phone: '',
   hospital_city: '',
+  head_ipsrs_name: '',
+  head_ipsrs_nip: '',
   telegram_bot_token: '',
   telegram_chat_id: '',
   telegram_notif_emergency: 1,
@@ -421,6 +459,8 @@ function syncFormWithStore() {
   form.hospital_address = s.hospital_address || 'Jl. Hayam Wuruk No. 123, Gondanglegi, Malang';
   form.hospital_phone = s.hospital_phone || '(0341) 879222';
   form.hospital_city = s.hospital_city || 'Gondanglegi';
+  form.head_ipsrs_name = s.head_ipsrs_name || 'Ahmad Elektromedik, S.Tr.Kes';
+  form.head_ipsrs_nip = s.head_ipsrs_nip || '19850712 201001 1 002';
   form.telegram_bot_token = s.telegram_bot_token || '';
   form.telegram_chat_id = s.telegram_chat_id || '';
   form.telegram_notif_emergency = s.telegram_notif_emergency !== undefined ? Number(s.telegram_notif_emergency) : 1;
@@ -463,6 +503,8 @@ async function saveSettings() {
   formData.append('hospital_address', form.hospital_address);
   formData.append('hospital_phone', form.hospital_phone);
   formData.append('hospital_city', form.hospital_city);
+  formData.append('head_ipsrs_name', form.head_ipsrs_name);
+  formData.append('head_ipsrs_nip', form.head_ipsrs_nip);
   formData.append('telegram_bot_token', form.telegram_bot_token);
   formData.append('telegram_chat_id', form.telegram_chat_id);
   formData.append('telegram_notif_emergency', form.telegram_notif_emergency);

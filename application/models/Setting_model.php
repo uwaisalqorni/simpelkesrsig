@@ -18,6 +18,8 @@ class Setting_model extends CI_Model {
                     'hospital_address'  => !empty($tenant['address']) ? $tenant['address'] : '',
                     'hospital_phone'    => !empty($tenant['phone']) ? $tenant['phone'] : '',
                     'hospital_city'     => !empty($tenant['city']) ? $tenant['city'] : '',
+                    'head_ipsrs_name'   => !empty($tenant['head_ipsrs_name']) ? $tenant['head_ipsrs_name'] : 'Ahmad Elektromedik, S.Tr.Kes',
+                    'head_ipsrs_nip'    => !empty($tenant['head_ipsrs_nip']) ? $tenant['head_ipsrs_nip'] : '19850712 201001 1 002',
                     'hospital_logo'     => !empty($tenant['logo_path']) ? $tenant['logo_path'] : null,
                     'telegram_bot_token'        => null,
                     'telegram_chat_id'          => null,
@@ -34,6 +36,8 @@ class Setting_model extends CI_Model {
                     'hospital_address'  => '',
                     'hospital_phone'    => '',
                     'hospital_city'     => '',
+                    'head_ipsrs_name'   => 'Ahmad Elektromedik, S.Tr.Kes',
+                    'head_ipsrs_nip'    => '19850712 201001 1 002',
                     'hospital_logo'     => null,
                     'telegram_bot_token'        => null,
                     'telegram_chat_id'          => null,
@@ -68,6 +72,8 @@ class Setting_model extends CI_Model {
         if (isset($data['hospital_address']))  $tenant_update['address'] = $data['hospital_address'];
         if (isset($data['hospital_phone']))    $tenant_update['phone'] = $data['hospital_phone'];
         if (isset($data['hospital_city']))     $tenant_update['city'] = $data['hospital_city'];
+        if (isset($data['head_ipsrs_name']))   $tenant_update['head_ipsrs_name'] = $data['head_ipsrs_name'];
+        if (isset($data['head_ipsrs_nip']))    $tenant_update['head_ipsrs_nip'] = $data['head_ipsrs_nip'];
         if (isset($data['hospital_logo']))     $tenant_update['logo_path'] = $data['hospital_logo'];
 
         if (!empty($tenant_update)) {

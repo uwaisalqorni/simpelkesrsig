@@ -412,8 +412,8 @@
           <div class="font-bold text-slate-900 mt-0.5">Kepala {{ settingStore.hospitalSubtitle }}</div>
           <div class="text-[11px] text-slate-600">{{ settingStore.hospitalName }}</div>
           <div class="h-16"></div>
-          <div class="font-bold underline">( Ahmad Elektromedik, S.Tr.Kes )</div>
-          <div class="text-[10px] text-slate-500">NIP: 19850712 201001 1 002</div>
+          <div class="font-bold underline">( {{ settingStore.headIpsrsName || '................................' }} )</div>
+          <div class="text-[10px] text-slate-500">NIP: {{ settingStore.headIpsrsNip || '....................' }}</div>
         </div>
 
         <div>

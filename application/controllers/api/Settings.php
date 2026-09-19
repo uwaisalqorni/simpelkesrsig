@@ -67,6 +67,8 @@ class Settings extends Base_Api_Controller {
         if (isset($input['hospital_address']))  $data['hospital_address']  = trim($input['hospital_address']);
         if (isset($input['hospital_phone']))    $data['hospital_phone']    = trim($input['hospital_phone']);
         if (isset($input['hospital_city']))     $data['hospital_city']     = trim($input['hospital_city']);
+        if (isset($input['head_ipsrs_name']))   $data['head_ipsrs_name']   = trim($input['head_ipsrs_name']);
+        if (isset($input['head_ipsrs_nip']))    $data['head_ipsrs_nip']    = trim($input['head_ipsrs_nip']);
 
         // Konfigurasi Notifikasi Telegram Bot
         if (array_key_exists('telegram_bot_token', $input))        $data['telegram_bot_token']        = trim($input['telegram_bot_token']);

@@ -899,7 +899,10 @@ const handleExportExcel = async () => {
       name: settingStore.hospitalName,
       subtitle: settingStore.hospitalSubtitle,
       address: settingStore.hospitalAddress,
-      phone: settingStore.hospitalPhone
+      phone: settingStore.hospitalPhone,
+      city: settingStore.hospitalCity,
+      head_name: settingStore.headIpsrsName,
+      head_nip: settingStore.headIpsrsNip
     });
   } catch (err) {
     console.error('Export Excel error:', err);
@@ -917,7 +920,10 @@ const handleExportPDF = async () => {
       name: settingStore.hospitalName,
       subtitle: settingStore.hospitalSubtitle,
       address: settingStore.hospitalAddress,
-      phone: settingStore.hospitalPhone
+      phone: settingStore.hospitalPhone,
+      city: settingStore.hospitalCity,
+      head_name: settingStore.headIpsrsName,
+      head_nip: settingStore.headIpsrsNip
     });
   } catch (err) {
     console.error('Export PDF error:', err);
