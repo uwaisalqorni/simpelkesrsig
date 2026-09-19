@@ -75,10 +75,10 @@ $query_builder = TRUE;
 
 $db['default'] = array(
 	'dsn'	=> '',
-	'hostname' => 'localhost',
-	'username' => 'root',
-	'password' => 'bismillah',
-	'database' => 'simpelkesrsig',
+	'hostname' => function_exists('env') ? env('DB_HOST', 'localhost') : 'localhost',
+	'username' => function_exists('env') ? env('DB_USER', 'root') : 'root',
+	'password' => function_exists('env') ? env('DB_PASS', 'bismillah') : 'bismillah',
+	'database' => function_exists('env') ? env('DB_NAME', 'simpelkesrsig') : 'simpelkesrsig',
 	'dbdriver' => 'mysqli',
 	'dbprefix' => '',
 	'pconnect' => FALSE,

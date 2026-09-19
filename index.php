@@ -53,7 +53,13 @@
  *
  * NOTE: If you change these, also change the error_reporting() code below
  */
-	define('ENVIRONMENT', isset($_SERVER['CI_ENV']) ? $_SERVER['CI_ENV'] : 'development');
+	// Load SIMPELKES .env Configuration
+	if (file_exists(__DIR__ . '/application/core/Env.php')) {
+		require_once __DIR__ . '/application/core/Env.php';
+		Env::load(__DIR__ . '/.env');
+	}
+
+	define('ENVIRONMENT', function_exists('env') ? env('CI_ENV', 'production') : (isset($_SERVER['CI_ENV']) ? $_SERVER['CI_ENV'] : 'production'));
 
 /*
  *---------------------------------------------------------------

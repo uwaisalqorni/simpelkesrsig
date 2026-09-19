@@ -22,12 +22,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | If you need to allow multiple domains, remember that this file is still
 | a PHP script and you can easily do that on your own.
 |
-// Handle CORS
+// Handle CORS & Security Headers
+$corsOrigins = function_exists('env') ? env('CORS_ALLOWED_ORIGINS', '*') : '*';
+$allowedList = array_map('trim', explode(',', (string)$corsOrigins));
+
 if (isset($_SERVER['HTTP_ORIGIN'])) {
-    header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
-    header('Access-Control-Allow-Credentials: true');
-    header('Access-Control-Max-Age: 86400');
-} else {
+    $requestOrigin = $_SERVER['HTTP_ORIGIN'];
+    if ($corsOrigins === '*' || in_array($requestOrigin, $allowedList, true)) {
+        header("Access-Control-Allow-Origin: {$requestOrigin}");
+        header('Access-Control-Allow-Credentials: true');
+        header('Access-Control-Max-Age: 86400');
+    }
+} elseif ($corsOrigins === '*') {
     header("Access-Control-Allow-Origin: *");
 }
 
@@ -38,7 +44,7 @@ if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'OPTIONS'
     if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS'])) {
         header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
     } else {
-        header("Access-Control-Allow-Headers: Authorization, Content-Type, Accept, X-Requested-With, Origin");
+        header("Access-Control-Allow-Headers: Authorization, Content-Type, Accept, X-Requested-With, Origin, X-Tenant-Id");
     }
     exit(0);
 }
