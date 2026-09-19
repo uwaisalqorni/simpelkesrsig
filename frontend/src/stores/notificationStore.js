@@ -32,9 +32,18 @@ export const useNotificationStore = defineStore('notification', () => {
     return summary.value?.kpi?.overdue_pm || 0;
   });
 
-  // Total attention alerts (emergency + calibrations + overdue PM)
+  // Tickets waiting verification / testing by room unit
+  const waitingVerificationCount = computed(() => {
+    return summary.value?.work_orders?.waiting_verification || 0;
+  });
+
+  const waitingVerificationList = computed(() => {
+    return summary.value?.waiting_verification_list || [];
+  });
+
+  // Total attention alerts (emergency + calibrations + overdue PM + waiting verification)
   const totalAlertsCount = computed(() => {
-    return emergencyTicketsCount.value + calibrationAlertsCount.value + overduePmCount.value;
+    return emergencyTicketsCount.value + calibrationAlertsCount.value + overduePmCount.value + waitingVerificationCount.value;
   });
 
   // Web Audio API Synthesizer (Chime alert)
@@ -134,6 +143,8 @@ export const useNotificationStore = defineStore('notification', () => {
     emergencyTicketsCount,
     calibrationAlertsCount,
     overduePmCount,
+    waitingVerificationCount,
+    waitingVerificationList,
     totalAlertsCount,
     playAlertSound,
     toggleSound,

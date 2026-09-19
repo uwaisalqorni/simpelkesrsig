@@ -151,14 +151,23 @@
           <span>Cetak Berita Acara</span>
         </button>
 
-        <!-- Button Serah Terima / Digital Signature jika completed_technician atau ruangan -->
+        <!-- Button Serah Terima & Tolak jika completed_technician dan berhak verifikasi -->
         <button 
-          v-if="ticket?.status === 'completed_technician' || (ticket?.status === 'in_progress' && (authStore.isRuangan || authStore.isAdmin))"
+          v-if="ticket?.status === 'completed_technician' && canVerify"
           @click="showSignatureModal = true"
-          class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-1.5 animate-pulse"
+          class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-1.5 animate-pulse"
         >
           <PenTool class="w-3.5 h-3.5" />
-          Verifikasi & Tanda Tangan
+          Uji Normal & Tanda Tangan
+        </button>
+
+        <button 
+          v-if="ticket?.status === 'completed_technician' && canVerify"
+          @click="showRejectModal = true"
+          class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-1.5"
+        >
+          <XCircle class="w-3.5 h-3.5" />
+          Alat Belum Normal (Tolak)
         </button>
       </div>
     </div>
@@ -170,6 +179,74 @@
 
     <template v-else-if="ticket">
       <div class="print:hidden space-y-6">
+        <!-- Alert Banner jika tiket sebelumnya ditolak unit -->
+        <div 
+          v-if="ticket.rejection_reason && ticket.status !== 'closed'" 
+          class="p-4 bg-rose-50 border-l-4 border-rose-500 rounded-2xl shadow-xs space-y-1.5"
+        >
+          <div class="flex items-center gap-2 text-rose-800 text-xs font-bold">
+            <AlertTriangle class="w-4 h-4 text-rose-600 shrink-0" />
+            <span>Hasil Pengujian Fungsi Sebelumnya Ditolak oleh Unit Kerja</span>
+          </div>
+          <div class="text-xs text-rose-800 bg-white/90 p-3 rounded-xl border border-rose-200">
+            <strong>Catatan Kendala:</strong> {{ ticket.rejection_reason }}
+          </div>
+          <div class="text-[11px] text-slate-500">
+            Teknisi perlu menindaklanjuti kendala di atas sebelum mengajukan uji fungsi ulang kepada unit.
+          </div>
+        </div>
+
+        <!-- Panel Uji Coba Fungsi & Validasi Serah Terima jika status === 'completed_technician' -->
+        <div 
+          v-if="ticket.status === 'completed_technician'" 
+          class="p-6 bg-gradient-to-r from-indigo-950 via-slate-900 to-indigo-900 text-white rounded-2xl shadow-xl space-y-4 border border-indigo-700/40 relative overflow-hidden"
+        >
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="space-y-1.5 flex-1">
+              <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-xs font-bold">
+                <CheckSquare class="w-4 h-4 text-emerald-400" />
+                Pengerjaan Teknisi Selesai &bull; Siap Uji Operasional
+              </div>
+              <h2 class="text-lg font-black tracking-tight text-white">
+                Validasi Serah Terima & Uji Fungsi Unit Ruangan
+              </h2>
+              <p class="text-xs text-indigo-100/90 leading-relaxed max-w-2xl">
+                Teknisi (<strong class="text-emerald-300">{{ ticket.technician_name || 'IPSRS' }}</strong>) telah menyelesaikan tindakan perbaikan. Sebelum alat medis digunakan kembali untuk pelayanan pasien dan tiket ditutup, petugas unit kerja (<strong class="text-emerald-300">{{ ticket.room_name }}</strong>) wajib melakukan uji operasional bersama dan memberikan tanda tangan serah terima.
+              </p>
+            </div>
+
+            <!-- Tombol Aksi Verifikasi untuk yang Berhak -->
+            <div v-if="canVerify" class="flex flex-col sm:flex-row md:flex-col gap-2.5 shrink-0">
+              <button 
+                @click="showSignatureModal = true"
+                class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-extrabold rounded-xl shadow-lg shadow-emerald-950/40 transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <PenTool class="w-4 h-4" />
+                <span>Uji Normal & Tanda Tangan</span>
+              </button>
+
+              <button 
+                @click="showRejectModal = true"
+                class="px-5 py-2.5 bg-rose-600/90 hover:bg-rose-600 text-white text-xs font-bold rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+              >
+                <XCircle class="w-4 h-4" />
+                <span>Alat Belum Normal (Tolak)</span>
+              </button>
+            </div>
+
+            <!-- Notice jika user bukan unit ruangan terkait -->
+            <div v-else class="p-4 bg-white/10 backdrop-blur-sm rounded-xl border border-white/15 text-xs text-indigo-100 max-w-xs shrink-0">
+              <div class="font-bold text-white flex items-center gap-1.5 mb-1">
+                <ShieldAlert class="w-4 h-4 text-amber-300" />
+                Menunggu Validasi Unit
+              </div>
+              <div class="text-[11px] text-indigo-200">
+                Persetujuan serah terima dikhususkan bagi petugas ruangan <strong>{{ ticket.room_name }}</strong> atau Administrator IPSRS.
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Top Overview Box -->
         <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm space-y-4">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-4">
@@ -443,18 +520,62 @@
       @close="showSignatureModal = false"
       @confirm="handleSignatureConfirmed"
     />
+
+    <!-- Modal Penolakan Hasil Perbaikan / Uji Coba Fungsi Belum Sesuai -->
+    <div v-if="showRejectModal" class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
+      <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div class="flex items-center gap-2 text-rose-600">
+            <XCircle class="w-5 h-5" />
+            <h3 class="font-bold text-sm text-slate-900">Tolak Hasil Uji Coba / Belum Normal</h3>
+          </div>
+          <button @click="showRejectModal = false" class="text-slate-400 hover:text-slate-800"><X class="w-5 h-5" /></button>
+        </div>
+
+        <p class="text-xs text-slate-600 leading-relaxed">
+          Sebutkan kendala atau fungsi alat yang masih bermasalah saat pengujian. Tiket akan dikembalikan ke status <strong>Dalam Pengerjaan</strong> agar teknisi dapat menindaklanjutinya.
+        </p>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Catatan Kendala yang Masih Ditemukan *</label>
+          <textarea 
+            v-model="rejectNotes" 
+            rows="3" 
+            placeholder="Contoh: Lampu indikator masih kedip merah dan suhu belum stabil..."
+            class="w-full px-3 py-2 text-xs border border-rose-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 bg-rose-50/20"
+          ></textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+          <button type="button" @click="showRejectModal = false" class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg cursor-pointer">
+            Batal
+          </button>
+          <button 
+            type="button"
+            @click="submitReject" 
+            :disabled="rejectSubmitting || !rejectNotes.trim()" 
+            class="px-4 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-lg disabled:opacity-50 cursor-pointer flex items-center gap-1.5 shadow-sm"
+          >
+            <span v-if="rejectSubmitting">Mengembalikan...</span>
+            <span v-else>Kembalikan ke Teknisi</span>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { 
   ArrowLeft, Wrench, Plus, PenTool, CheckCircle2, 
-  UserCheck, Boxes, Clock, X, Printer 
+  UserCheck, Boxes, Clock, X, Printer,
+  AlertTriangle, CheckSquare, XCircle, ShieldAlert 
 } from 'lucide-vue-next';
 import { useAuthStore } from '../../stores/authStore';
 import { useSettingStore } from '../../stores/settingStore';
+import { useNotificationStore } from '../../stores/notificationStore';
 import axiosClient, { getUploadUrl } from '../../api/axiosClient';
 import DigitalSignatureModal from '../../components/DigitalSignatureModal.vue';
 import SearchableSelect from '../../components/SearchableSelect.vue';
@@ -464,9 +585,21 @@ const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
 const settingStore = useSettingStore();
+const notifStore = useNotificationStore();
 
 const ticket = ref(null);
 const loading = ref(true);
+
+const showRejectModal = ref(false);
+const rejectNotes = ref('');
+const rejectSubmitting = ref(false);
+
+const canVerify = computed(() => {
+  if (!ticket.value) return false;
+  if (authStore.isAdmin) return true;
+  if (authStore.isRuangan && authStore.user?.room_id == ticket.value.room_id) return true;
+  return false;
+});
 
 const printWorkOrder = () => {
   window.print();
@@ -614,10 +747,35 @@ const handleSignatureConfirmed = async ({ signatureData, notes }) => {
     });
     if (res.success) {
       showSignatureModal.value = false;
+      notifStore.fetchSummary();
       fetchTicket();
     }
   } catch (err) {
     alert(err.response?.data?.message || 'Gagal memverifikasi tiket.');
+  }
+};
+
+const submitReject = async () => {
+  if (!rejectNotes.value.trim()) {
+    alert('Silakan tuliskan catatan kendala yang masih ditemukan.');
+    return;
+  }
+  rejectSubmitting.value = true;
+  try {
+    const res = await axiosClient.post(`/work-orders/verify/${ticket.value.id}`, {
+      is_accepted: false,
+      notes: rejectNotes.value.trim()
+    });
+    if (res.success) {
+      showRejectModal.value = false;
+      rejectNotes.value = '';
+      notifStore.fetchSummary();
+      fetchTicket();
+    }
+  } catch (err) {
+    alert(err.response?.data?.message || 'Gagal mengembalikan tiket ke teknisi.');
+  } finally {
+    rejectSubmitting.value = false;
   }
 };
 

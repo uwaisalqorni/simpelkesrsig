@@ -103,6 +103,68 @@
         </div>
       </div>
 
+      <!-- SECTION: Perhatian Khusus - Tiket Menunggu Validasi & Uji Fungsi Unit Ruangan -->
+      <div 
+        v-if="summary.waiting_verification_list && summary.waiting_verification_list.length > 0"
+        class="bg-gradient-to-r from-indigo-950 via-slate-900 to-indigo-900 rounded-2xl p-6 text-white shadow-xl border border-indigo-500/30 space-y-4"
+      >
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-indigo-800/60 pb-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <CheckSquare class="w-5 h-5 text-emerald-400" />
+              <h3 class="text-base font-extrabold tracking-tight">
+                Menunggu Uji Coba Fungsi & Validasi Serah Terima Unit
+              </h3>
+              <span class="px-2.5 py-0.5 rounded-full text-[11px] font-black bg-emerald-500 text-white animate-pulse shadow-sm">
+                {{ summary.waiting_verification_list.length }} Tiket
+              </span>
+            </div>
+            <p class="text-xs text-indigo-200 mt-1">
+              Teknisi telah menyelesaikan perbaikan pada alkes di bawah ini. Harap lakukan uji fungsi bersama dan berikan tanda tangan serah terima agar alat dapat beroperasi kembali.
+            </p>
+          </div>
+          <router-link 
+            to="/tickets"
+            class="text-xs font-bold text-indigo-300 hover:text-white inline-flex items-center gap-1 self-start sm:self-auto cursor-pointer"
+          >
+            <span>Daftar Semua Tiket</span>
+            <ArrowRight class="w-3.5 h-3.5" />
+          </router-link>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-1">
+          <div 
+            v-for="item in summary.waiting_verification_list" 
+            :key="item.id"
+            class="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/15 hover:border-emerald-400/50 transition-all flex flex-col justify-between space-y-3"
+          >
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between">
+                <span class="font-mono text-xs font-black text-emerald-300">{{ item.ticket_number }}</span>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-200 border border-purple-400/30">
+                  Uji Fungsi
+                </span>
+              </div>
+              <div class="font-bold text-sm text-white">{{ item.equipment_name }}</div>
+              <div class="text-[11px] text-slate-300">
+                Aset: <span class="font-mono font-medium">{{ item.asset_code }}</span> &bull; Ruang: <strong>{{ item.room_name }}</strong>
+              </div>
+              <div class="text-[11px] text-indigo-200">
+                Teknisi: <strong class="text-white">{{ item.technician_name || 'Teknisi IPSRS' }}</strong>
+              </div>
+            </div>
+
+            <router-link 
+              :to="`/tickets/${item.id}`"
+              class="w-full py-2 px-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-lg shadow transition-all flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer"
+            >
+              <PenTool class="w-3.5 h-3.5" />
+              <span>Uji Fungsi & Validasi &rarr;</span>
+            </router-link>
+          </div>
+        </div>
+      </div>
+
       <!-- SECTION: Peringatan Kalibrasi Alat Medis (Mendekati Jatuh Tempo & Habis Masa Berlaku) -->
       <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 space-y-4">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-4">
@@ -425,7 +487,8 @@
 import { ref, computed, onMounted } from 'vue';
 import { 
   Sparkles, PlusCircle, CheckCircle2, Wrench, AlertTriangle, 
-  Clock, Stethoscope, Award, AlertOctagon, ArrowRight, CalendarDays 
+  Clock, Stethoscope, Award, AlertOctagon, ArrowRight, CalendarDays,
+  CheckSquare, PenTool 
 } from 'lucide-vue-next';
 import { useAuthStore } from '../stores/authStore';
 import axiosClient from '../api/axiosClient';

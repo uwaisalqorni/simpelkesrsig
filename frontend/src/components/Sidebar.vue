@@ -15,10 +15,12 @@
         <div class="min-w-0">
           <div class="font-extrabold text-base tracking-wide text-white flex items-center gap-1.5">
             SIMPELKES
-            <span class="text-[9px] font-bold px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 rounded">RS</span>
+            <span class="text-[9px] font-bold px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 rounded">
+              {{ authStore.isSuperAdmin ? 'HOLDING' : (authStore.tenantCode || 'RS') }}
+            </span>
           </div>
-          <div class="text-[10px] text-slate-400 font-medium truncate max-w-[135px]" :title="settingStore.hospitalName">
-            {{ settingStore.hospitalName }}
+          <div class="text-[10px] text-slate-400 font-medium truncate max-w-[135px]" :title="authStore.tenantName || settingStore.hospitalName">
+            {{ authStore.tenantName || settingStore.hospitalName }}
           </div>
         </div>
       </div>
@@ -69,6 +71,13 @@
         >
           <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
           {{ notifStore.emergencyTicketsCount }} DARURAT
+        </span>
+        <span 
+          v-else-if="notifStore.waitingVerificationCount > 0" 
+          class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-indigo-500 text-white animate-pulse shadow-sm"
+          title="Tiket Menunggu Uji Fungsi & Validasi Unit"
+        >
+          {{ notifStore.waitingVerificationCount }} Uji
         </span>
         <span 
           v-else-if="notifStore.activeTicketsCount > 0" 
@@ -204,6 +213,27 @@
         </router-link>
       </template>
 
+      <!-- Menu Khusus Platform Holding / Super Admin -->
+      <template v-if="authStore.isSuperAdmin">
+        <div class="text-[11px] font-bold uppercase tracking-wider text-amber-400/90 px-3 pt-4 mb-2 flex items-center gap-1.5">
+          <Building2 class="w-3.5 h-3.5 text-amber-400" />
+          <span>Platform Holding</span>
+        </div>
+
+        <router-link 
+          to="/tenants" 
+          @click="handleNavClick"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all"
+          :class="[$route.path.startsWith('/tenants') ? 'bg-amber-600 text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white']"
+        >
+          <Building2 class="w-5 h-5 text-amber-400" />
+          <span class="flex-1">Kelola Faskes</span>
+          <span class="px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded">
+            Tenants
+          </span>
+        </router-link>
+      </template>
+
       <!-- Tombol Keluar di Sidebar -->
       <div class="pt-4 mt-2 border-t border-slate-800">
         <button 
@@ -233,7 +263,7 @@
 import { 
   Activity, X, LayoutDashboard, Stethoscope, Wrench, 
   PlusCircle, CalendarCheck, CalendarDays, Award, Boxes, DoorOpen,
-  FileBarChart, Users, ShieldCheck, Sliders, LogOut
+  FileBarChart, Users, ShieldCheck, Sliders, LogOut, Building2
 } from 'lucide-vue-next';
 import { useAuthStore } from '../stores/authStore';
 import { useSettingStore } from '../stores/settingStore';

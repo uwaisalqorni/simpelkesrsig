@@ -17,8 +17,32 @@ class Settings extends Base_Api_Controller {
         if ($this->input->method() === 'post') {
             return $this->update();
         }
-        // Settings can be fetched by authenticated users (or even public for login screen)
-        $settings = $this->setting_m->get_settings();
+
+        $auth_header = $this->input->get_request_header('Authorization', TRUE);
+        $tenant_id = null;
+
+        if (!empty($auth_header)) {
+            try {
+                $this->authenticate();
+                $tenant_id = $this->get_tenant_id();
+            } catch (Exception $e) {
+                // Abaikan error token untuk fetch awal/publik
+            }
+        }
+
+        // Jika belum ada tenant_id atau superadmin tanpa token, cek header X-Tenant-Id atau query param
+        if (empty($tenant_id)) {
+            $header_tenant = $this->input->get_request_header('X-Tenant-Id', TRUE);
+            if (!empty($header_tenant) && is_numeric($header_tenant)) {
+                $tenant_id = (int)$header_tenant;
+            } elseif ($this->input->get('tenant_id')) {
+                $tenant_id = (int)$this->input->get('tenant_id');
+            } else {
+                $tenant_id = 1; // Default ke Tenant 1 (RS Islam Gondanglegi)
+            }
+        }
+
+        $settings = $this->setting_m->get_settings($tenant_id);
         $this->json_response(true, 'Pengaturan sistem berhasil diambil.', $settings);
     }
 
@@ -27,6 +51,10 @@ class Settings extends Base_Api_Controller {
      */
     public function update() {
         $this->require_role(['admin']);
+        $tenant_id = $this->get_tenant_id();
+        if (empty($tenant_id)) {
+            $tenant_id = 1;
+        }
         
         $input = $this->input->post();
         if (empty($input)) {
@@ -52,11 +80,11 @@ class Settings extends Base_Api_Controller {
         }
 
         if (!empty($data)) {
-            $this->setting_m->update_settings($data);
-            $this->log_audit('UPDATE_SETTINGS', 'app_settings', 1, $data);
+            $this->setting_m->update_settings($data, $tenant_id);
+            $this->log_audit('UPDATE_SETTINGS', 'app_settings', $tenant_id, $data);
         }
 
-        $updated = $this->setting_m->get_settings();
+        $updated = $this->setting_m->get_settings($tenant_id);
         $this->json_response(true, 'Pengaturan Rumah Sakit berhasil disimpan.', $updated);
     }
 }

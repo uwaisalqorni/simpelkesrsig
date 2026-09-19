@@ -4,6 +4,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Preventive_model extends CI_Model {
 
     private function _apply_filters($filters = []) {
+        if (!empty($filters['tenant_id'])) {
+            $this->db->where('ps.tenant_id', $filters['tenant_id']);
+        }
         if (!empty($filters['status'])) {
             $this->db->where('ps.status', $filters['status']);
         }

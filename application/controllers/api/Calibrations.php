@@ -20,6 +20,7 @@ class Calibrations extends Base_Api_Controller {
 
         $user = $this->authenticate(true);
         $filters = [
+            'tenant_id'    => $this->get_tenant_id(),
             'equipment_id' => $this->input->get('equipment_id'),
             'result'       => $this->input->get('result'),
             'room_id'      => $this->input->get('room_id'),
@@ -138,6 +139,7 @@ class Calibrations extends Base_Api_Controller {
         $certificate_path = $upload_result['path'];
 
         $data = [
+            'tenant_id'             => $this->get_tenant_id(),
             'equipment_id'          => (int)$equipment_id,
             'calibration_date'      => $calibration_date,
             'valid_until'           => $valid_until,

@@ -243,6 +243,7 @@ const handleLogin = async () => {
 
   const ok = await authStore.login(username.value, password.value);
   if (ok) {
+    await settingStore.fetchSettings();
     const target = route.query.redirect || '/';
     router.push(target);
   }

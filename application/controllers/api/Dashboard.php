@@ -14,6 +14,7 @@ class Dashboard extends Base_Api_Controller {
      */
     public function summary() {
         $user = $this->authenticate(true);
+        $tenant_id = $this->get_tenant_id();
 
         // Filter jika user ruangan
         $room_filter = ($user['role'] === 'ruangan') ? $user['room_id'] : null;
@@ -28,6 +29,9 @@ class Dashboard extends Base_Api_Controller {
         ");
         $this->db->from('medical_equipment');
         $this->db->where('is_deleted', 0);
+        if ($tenant_id) {
+            $this->db->where('tenant_id', $tenant_id);
+        }
         if ($room_filter) {
             $this->db->where('room_id', $room_filter);
         }
@@ -46,6 +50,9 @@ class Dashboard extends Base_Api_Controller {
             SUM(CASE WHEN priority = 'emergency' AND status != 'closed' THEN 1 ELSE 0 END) as emergency_tickets
         ");
         $this->db->from('work_orders wo');
+        if ($tenant_id) {
+            $this->db->where('wo.tenant_id', $tenant_id);
+        }
         if ($room_filter) {
             $this->db->join('medical_equipment e', 'e.id = wo.equipment_id');
             $this->db->where('e.room_id', $room_filter);
@@ -53,10 +60,12 @@ class Dashboard extends Base_Api_Controller {
         $wo_stats = $this->db->get()->row_array();
 
         // 3. Perhitungan MTTR (Mean Time To Repair) dalam Jam
-        // Selisih reported_at sampai closed_at pada tiket tertutup
         $this->db->select("AVG(TIMESTAMPDIFF(MINUTE, reported_at, closed_at)) as avg_repair_minutes");
         $this->db->from('work_orders');
         $this->db->where('closed_at IS NOT NULL');
+        if ($tenant_id) {
+            $this->db->where('tenant_id', $tenant_id);
+        }
         if ($room_filter) {
             $this->db->join('medical_equipment e', 'e.id = work_orders.equipment_id');
             $this->db->where('e.room_id', $room_filter);
@@ -69,6 +78,9 @@ class Dashboard extends Base_Api_Controller {
         $this->db->select("AVG(TIMESTAMPDIFF(MINUTE, reported_at, response_at)) as avg_response_minutes");
         $this->db->from('work_orders');
         $this->db->where('response_at IS NOT NULL');
+        if ($tenant_id) {
+            $this->db->where('tenant_id', $tenant_id);
+        }
         $resp_row = $this->db->get()->row_array();
         $avg_response_minutes = !empty($resp_row['avg_response_minutes']) ? round($resp_row['avg_response_minutes'], 1) : 0;
 
@@ -99,6 +111,9 @@ class Dashboard extends Base_Api_Controller {
         $this->db->join('rooms r', 'r.id = e.room_id', 'left');
         $this->db->where("c.valid_until <= DATE_ADD(CURRENT_DATE, INTERVAL 60 DAY)");
         $this->db->where('e.is_deleted', 0);
+        if ($tenant_id) {
+            $this->db->where('c.tenant_id', $tenant_id);
+        }
         if ($room_filter) {
             $this->db->where('e.room_id', $room_filter);
         }
@@ -121,6 +136,9 @@ class Dashboard extends Base_Api_Controller {
             SUM(CASE WHEN status = 'overdue' THEN 1 ELSE 0 END) as overdue_pm
         ");
         $this->db->from('preventive_schedules ps');
+        if ($tenant_id) {
+            $this->db->where('ps.tenant_id', $tenant_id);
+        }
         if ($room_filter) {
             $this->db->join('medical_equipment e', 'e.id = ps.equipment_id');
             $this->db->where('e.room_id', $room_filter);
@@ -132,12 +150,31 @@ class Dashboard extends Base_Api_Controller {
         $this->db->from('work_orders wo');
         $this->db->join('medical_equipment e', 'e.id = wo.equipment_id', 'left');
         $this->db->join('rooms r', 'r.id = e.room_id', 'left');
+        if ($tenant_id) {
+            $this->db->where('wo.tenant_id', $tenant_id);
+        }
         if ($room_filter) {
             $this->db->where('e.room_id', $room_filter);
         }
         $this->db->order_by('wo.id', 'DESC');
         $this->db->limit(5);
         $recent_tickets = $this->db->get()->result_array();
+
+        // 8. Tiket Menunggu Verifikasi & Uji Fungsi Unit Ruangan
+        $this->db->select('wo.*, e.name as equipment_name, e.asset_code, e.serial_number, r.name as room_name, u.full_name as technician_name');
+        $this->db->from('work_orders wo');
+        $this->db->join('medical_equipment e', 'e.id = wo.equipment_id', 'left');
+        $this->db->join('rooms r', 'r.id = e.room_id', 'left');
+        $this->db->join('users u', 'u.id = wo.assigned_technician_id', 'left');
+        $this->db->where('wo.status', 'completed_technician');
+        if ($tenant_id) {
+            $this->db->where('wo.tenant_id', $tenant_id);
+        }
+        if ($room_filter) {
+            $this->db->where('e.room_id', $room_filter);
+        }
+        $this->db->order_by('wo.id', 'DESC');
+        $waiting_verification_list = $this->db->get()->result_array();
 
         $this->json_response(true, 'Statistik ringkasan dashboard.', [
             'equipment' => [
@@ -164,8 +201,9 @@ class Dashboard extends Base_Api_Controller {
                 'pending_pm'           => (int)$pm_stats['pending_pm'],
                 'overdue_pm'           => (int)$pm_stats['overdue_pm']
             ],
-            'calibration_alerts' => $calibration_alerts,
-            'recent_tickets'     => $recent_tickets
+            'calibration_alerts'        => $calibration_alerts,
+            'recent_tickets'            => $recent_tickets,
+            'waiting_verification_list' => $waiting_verification_list
         ]);
     }
 }

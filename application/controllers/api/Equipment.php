@@ -20,6 +20,7 @@ class Equipment extends Base_Api_Controller {
 
         $user = $this->authenticate(true);
         $filters = [
+            'tenant_id'   => $this->get_tenant_id(),
             'room_id'     => $this->input->get('room_id'),
             'category_id' => $this->input->get('category_id'),
             'status'      => $this->input->get('status'),
@@ -169,6 +170,7 @@ class Equipment extends Base_Api_Controller {
         }
 
         $data = [
+            'tenant_id'          => $this->get_tenant_id(),
             'asset_code'         => $asset_code,
             'serial_number'      => trim($input['serial_number']),
             'name'               => trim($input['name']),

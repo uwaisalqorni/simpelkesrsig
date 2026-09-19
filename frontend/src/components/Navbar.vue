@@ -13,8 +13,92 @@
 
       <div class="flex items-center gap-2">
         <span class="text-xs font-semibold px-2.5 py-1 bg-brand-50 text-brand-700 rounded-full border border-brand-200 uppercase tracking-wide">
-          {{ authStore.role }}
+          {{ authStore.role === 'super_admin' ? 'Super Admin' : authStore.role }}
         </span>
+
+        <!-- Tenant Switcher Dropdown for Super Admin -->
+        <div v-if="authStore.isSuperAdmin" class="relative" ref="tenantDropdownRef">
+          <button 
+            type="button"
+            @click="toggleTenantDropdown"
+            class="flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer"
+            title="Ganti Lingkup Faskes (Tenant Switcher)"
+          >
+            <Building2 class="w-3.5 h-3.5 text-amber-700 shrink-0" />
+            <span class="max-w-[130px] sm:max-w-[200px] truncate">
+              {{ authStore.activeTenantName || 'Semua Faskes (Holding)' }}
+            </span>
+            <ChevronDown class="w-3.5 h-3.5 text-amber-600 transition-transform" :class="{ 'rotate-180': isTenantDropdownOpen }" />
+          </button>
+
+          <!-- Dropdown Box -->
+          <div 
+            v-if="isTenantDropdownOpen"
+            class="absolute left-0 mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150"
+          >
+            <div class="p-3 bg-amber-600 text-white flex items-center justify-between">
+              <div class="font-bold text-xs flex items-center gap-1.5">
+                <Building2 class="w-4 h-4" />
+                <span>Pilih Lingkup Faskes</span>
+              </div>
+              <router-link 
+                to="/tenants" 
+                @click="isTenantDropdownOpen = false"
+                class="text-[10px] font-bold underline hover:text-amber-100"
+              >
+                Kelola
+              </router-link>
+            </div>
+
+            <div class="p-1 max-h-64 overflow-y-auto divide-y divide-slate-100">
+              <!-- Global Holding Option -->
+              <button 
+                type="button"
+                @click="handleSelectTenant(null)"
+                class="w-full text-left p-2.5 rounded-xl hover:bg-slate-50 flex items-center justify-between group transition-colors cursor-pointer"
+                :class="{ 'bg-amber-50 font-bold text-amber-900': !authStore.activeTenantId }"
+              >
+                <div class="flex items-center gap-2">
+                  <Globe class="w-4 h-4 text-slate-500 group-hover:text-amber-600 shrink-0" />
+                  <div>
+                    <div class="text-xs font-semibold">🌐 Semua Faskes (Holding)</div>
+                    <div class="text-[10px] text-slate-400 font-normal">Data agregat seluruh rumah sakit</div>
+                  </div>
+                </div>
+                <Check v-if="!authStore.activeTenantId" class="w-4 h-4 text-amber-600 shrink-0" />
+              </button>
+
+              <!-- Tenant Items -->
+              <button 
+                v-for="t in tenantList" 
+                :key="t.id"
+                type="button"
+                @click="handleSelectTenant(t)"
+                class="w-full text-left p-2.5 rounded-xl hover:bg-slate-50 flex items-center justify-between group transition-colors cursor-pointer"
+                :class="{ 'bg-amber-50 font-bold text-amber-900': String(authStore.activeTenantId) === String(t.id) }"
+              >
+                <div class="flex items-center gap-2 min-w-0">
+                  <Building2 class="w-4 h-4 text-slate-400 group-hover:text-amber-600 shrink-0" />
+                  <div class="min-w-0">
+                    <div class="text-xs truncate font-medium group-hover:text-amber-900">
+                      {{ t.name }}
+                      <span class="text-[10px] px-1 py-0.2 bg-slate-100 text-slate-600 rounded ml-1 font-mono font-bold">{{ t.code }}</span>
+                    </div>
+                    <div class="text-[10px] text-slate-400 font-normal truncate">{{ t.city || 'Faskes Terdaftar' }}</div>
+                  </div>
+                </div>
+                <Check v-if="String(authStore.activeTenantId) === String(t.id)" class="w-4 h-4 text-amber-600 shrink-0" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Static Tenant Badge for non-superadmin -->
+        <span v-else class="text-xs font-semibold px-2.5 py-1 bg-slate-100 text-slate-700 rounded-full border border-slate-200 hidden md:inline-flex items-center gap-1.5" :title="authStore.tenantName">
+          <Building2 class="w-3 h-3 text-emerald-600" />
+          <span class="max-w-[150px] truncate">{{ authStore.tenantName }}</span>
+        </span>
+
         <span class="text-sm font-medium text-slate-500 hidden sm:inline">
           Unit: <strong class="text-slate-700">{{ authStore.userRoom }}</strong>
         </span>
@@ -98,6 +182,27 @@
                   </span>
                 </div>
                 <p class="text-[11px] text-slate-600 mt-0.5">Ada kerusakan alat medis yang butuh penanganan segera dari teknisi IPSRS.</p>
+              </div>
+            </router-link>
+
+            <!-- 1.5. Tiket Menunggu Validasi & Uji Fungsi Ruangan -->
+            <router-link 
+              v-if="notifStore.waitingVerificationCount > 0"
+              to="/tickets"
+              @click="isDropdownOpen = false"
+              class="p-3 flex items-start gap-3 hover:bg-indigo-50/60 transition-colors rounded-xl group cursor-pointer"
+            >
+              <div class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0 mt-0.5 group-hover:scale-105 transition-transform">
+                <CheckSquare class="w-4 h-4 text-indigo-600" />
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-indigo-700">Menunggu Uji & Validasi Unit</span>
+                  <span class="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-indigo-600 text-white animate-pulse">
+                    {{ notifStore.waitingVerificationCount }} Tiket
+                  </span>
+                </div>
+                <p class="text-[11px] text-slate-600 mt-0.5">Teknisi selesai memperbaiki. Silakan uji coba fungsi & verifikasi serah terima.</p>
               </div>
             </router-link>
 
@@ -218,10 +323,12 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import { 
   Menu, QrCode, LogOut, Bell, Volume2, VolumeX, 
-  AlertTriangle, Award, CalendarCheck, CalendarDays, Wrench, CheckCircle2 
+  AlertTriangle, Award, CalendarCheck, CalendarDays, Wrench, CheckCircle2, CheckSquare,
+  Building2, ChevronDown, Globe, Check
 } from 'lucide-vue-next';
 import { useAuthStore } from '../stores/authStore';
 import { useNotificationStore } from '../stores/notificationStore';
+import axiosClient from '../api/axiosClient';
 
 const authStore = useAuthStore();
 const notifStore = useNotificationStore();
@@ -229,15 +336,45 @@ const notifStore = useNotificationStore();
 const isDropdownOpen = ref(false);
 const dropdownRef = ref(null);
 
+const isTenantDropdownOpen = ref(false);
+const tenantDropdownRef = ref(null);
+const tenantList = ref([]);
+
 defineEmits(['toggle-sidebar', 'open-qr-scanner', 'open-logout']);
 
 const toggleNotificationDropdown = () => {
   isDropdownOpen.value = !isDropdownOpen.value;
 };
 
+const toggleTenantDropdown = () => {
+  isTenantDropdownOpen.value = !isTenantDropdownOpen.value;
+};
+
+const handleSelectTenant = (tenant) => {
+  authStore.switchTenant(tenant);
+  isTenantDropdownOpen.value = false;
+  // Reload window to re-trigger all queries and stores with the new X-Tenant-Id
+  window.location.reload();
+};
+
+const fetchTenants = async () => {
+  if (!authStore.isSuperAdmin) return;
+  try {
+    const res = await axiosClient.get('/tenants');
+    if (res.success && Array.isArray(res.data)) {
+      tenantList.value = res.data;
+    }
+  } catch (err) {
+    console.error('Gagal mengambil daftar faskes:', err);
+  }
+};
+
 const handleClickOutside = (e) => {
   if (dropdownRef.value && !dropdownRef.value.contains(e.target)) {
     isDropdownOpen.value = false;
+  }
+  if (tenantDropdownRef.value && !tenantDropdownRef.value.contains(e.target)) {
+    isTenantDropdownOpen.value = false;
   }
 };
 
@@ -245,6 +382,7 @@ onMounted(() => {
   document.addEventListener('click', handleClickOutside);
   if (authStore.isAuthenticated) {
     notifStore.startPolling(45000);
+    fetchTenants();
   }
 });
 

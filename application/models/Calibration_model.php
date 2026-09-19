@@ -4,6 +4,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Calibration_model extends CI_Model {
 
     private function _apply_filters($filters = []) {
+        if (!empty($filters['tenant_id'])) {
+            $this->db->where('c.tenant_id', $filters['tenant_id']);
+        }
         if (!empty($filters['equipment_id'])) {
             $this->db->where('c.equipment_id', $filters['equipment_id']);
         }

@@ -18,7 +18,7 @@ class Rooms extends Base_Api_Controller {
             return $this->store();
         }
         $this->authenticate(true);
-        $rooms = $this->room_m->get_all(false); // Ambil semua ruangan termasuk non-aktif jika untuk admin
+        $rooms = $this->room_m->get_all(false, $this->get_tenant_id()); // Sesuai tenant aktif
         $this->json_response(true, 'Data ruangan berhasil diambil.', $rooms);
     }
 
@@ -46,10 +46,11 @@ class Rooms extends Base_Api_Controller {
         }
 
         $data = [
-            'code'     => strtoupper(trim($input['code'])),
-            'name'     => trim($input['name']),
-            'building' => isset($input['building']) ? trim($input['building']) : null,
-            'floor'    => isset($input['floor']) ? trim($input['floor']) : null,
+            'tenant_id' => $this->get_tenant_id(),
+            'code'      => strtoupper(trim($input['code'])),
+            'name'      => trim($input['name']),
+            'building'  => isset($input['building']) ? trim($input['building']) : null,
+            'floor'     => isset($input['floor']) ? trim($input['floor']) : null,
             'is_active' => isset($input['is_active']) ? (int)$input['is_active'] : 1
         ];
 

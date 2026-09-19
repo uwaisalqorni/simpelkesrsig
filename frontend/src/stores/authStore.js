@@ -5,6 +5,8 @@ export const useAuthStore = defineStore('auth', {
   state: () => ({
     user: JSON.parse(localStorage.getItem('simpelkes_user') || 'null'),
     token: localStorage.getItem('simpelkes_token') || null,
+    activeTenantId: localStorage.getItem('simpelkes_active_tenant_id') || null,
+    activeTenantName: localStorage.getItem('simpelkes_active_tenant_name') || null,
     loading: false,
     error: null,
   }),
@@ -12,11 +14,16 @@ export const useAuthStore = defineStore('auth', {
   getters: {
     isAuthenticated: (state) => !!state.token && !!state.user,
     role: (state) => state.user?.role || '',
-    isAdmin: (state) => state.user?.role === 'admin',
+    isSuperAdmin: (state) => state.user?.role === 'super_admin',
+    isAdmin: (state) => state.user?.role === 'admin' || state.user?.role === 'super_admin',
     isTeknisi: (state) => state.user?.role === 'teknisi',
     isRuangan: (state) => state.user?.role === 'ruangan',
     userName: (state) => state.user?.full_name || state.user?.username || 'User',
     userRoom: (state) => state.user?.room_name || 'Semua Ruangan',
+    tenantId: (state) => state.activeTenantId || state.user?.tenant_id || 1,
+    tenantName: (state) => state.activeTenantName || state.user?.tenant_name || 'RS Islam Gondanglegi',
+    tenantCode: (state) => state.user?.tenant_code || 'RSIG',
+    tenantLogo: (state) => state.user?.tenant_logo || null,
   },
 
   actions: {
@@ -54,14 +61,32 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
+    switchTenant(tenant) {
+      if (tenant && tenant.id) {
+        this.activeTenantId = String(tenant.id);
+        this.activeTenantName = tenant.name;
+        localStorage.setItem('simpelkes_active_tenant_id', String(tenant.id));
+        localStorage.setItem('simpelkes_active_tenant_name', tenant.name);
+      } else {
+        this.activeTenantId = null;
+        this.activeTenantName = null;
+        localStorage.removeItem('simpelkes_active_tenant_id');
+        localStorage.removeItem('simpelkes_active_tenant_name');
+      }
+    },
+
     async logout() {
       const currentToken = this.token;
       // 1. Bersihkan state dan storage lokal secara instan
       this.user = null;
       this.token = null;
+      this.activeTenantId = null;
+      this.activeTenantName = null;
       this.error = null;
       localStorage.removeItem('simpelkes_token');
       localStorage.removeItem('simpelkes_user');
+      localStorage.removeItem('simpelkes_active_tenant_id');
+      localStorage.removeItem('simpelkes_active_tenant_name');
       sessionStorage.clear();
 
       // 2. Beritahu server backend untuk audit log

@@ -3,12 +3,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Room_model extends CI_Model {
 
-    public function get_all($active_only = true) {
+    public function get_all($active_only = true, $tenant_id = null) {
         $this->db->select('r.*, COUNT(e.id) as total_equipment');
         $this->db->from('rooms r');
         $this->db->join('medical_equipment e', 'e.room_id = r.id AND e.is_deleted = 0', 'left');
         if ($active_only) {
             $this->db->where('r.is_active', 1);
+        }
+        if ($tenant_id) {
+            $this->db->where('r.tenant_id', $tenant_id);
         }
         $this->db->group_by('r.id');
         $this->db->order_by('r.name', 'ASC');

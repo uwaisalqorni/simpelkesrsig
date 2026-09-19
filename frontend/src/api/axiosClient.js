@@ -145,6 +145,11 @@ axiosClient.interceptors.request.use(async (config) => {
     }
 
     config.headers.Authorization = `Bearer ${token}`;
+
+    const activeTenantId = localStorage.getItem('simpelkes_active_tenant_id');
+    if (activeTenantId) {
+      config.headers['X-Tenant-Id'] = activeTenantId;
+    }
   }
   return config;
 }, (error) => {

@@ -360,6 +360,47 @@ export const exportReportsToExcel = (recap, hospitalInfo = {}) => {
   ];
   XLSX.utils.book_append_sheet(wb, wsCat, 'Kategori Risiko Alkes');
 
+  // 3. Sheet Tren Bulanan & Kepatuhan SPM
+  if (recap.monthly_trends || recap.spm_compliance) {
+    const trendData = [
+      [hospitalName.toUpperCase()],
+      [hospitalSubtitle],
+      [''],
+      ['TREN KERUSAKAN BULANAN & INDIKATOR KEPATUHAN SPM TEKNISI'],
+      [`Dicetak pada: ${printTime} WIB`],
+      [''],
+      ['Bulan / Periode', 'Laporan Masuk', 'Selesai Diperbaiki', 'Tiket Darurat (Emergency)']
+    ];
+
+    (recap.monthly_trends || []).forEach(t => {
+      trendData.push([
+        t.month_label || t.period_ym,
+        Number(t.total_reported) || 0,
+        Number(t.total_closed) || 0,
+        Number(t.emergency_count) || 0
+      ]);
+    });
+
+    if (recap.spm_compliance) {
+      trendData.push(['']);
+      trendData.push(['RINGKASAN INDIKATOR SPM KECEPATAN RESPON']);
+      trendData.push(['Respon Cepat (<= 15 Menit)', `${recap.spm_compliance.fast_under_15m || 0} Tiket`]);
+      trendData.push(['Respon Standar (15 - 30 Menit)', `${recap.spm_compliance.standard_15_30m || 0} Tiket`]);
+      trendData.push(['Respon Cukup (30 - 60 Menit)', `${recap.spm_compliance.moderate_30_60m || 0} Tiket`]);
+      trendData.push(['Respon Terlambat (> 60 Menit)', `${recap.spm_compliance.late_over_60m || 0} Tiket`]);
+      trendData.push(['Rata-rata Respon SPM', `${recap.spm_compliance.avg_response_minutes || 0} Menit`]);
+    }
+
+    const wsTrend = XLSX.utils.aoa_to_sheet(trendData);
+    wsTrend['!cols'] = [
+      { wch: 32 },
+      { wch: 18 },
+      { wch: 20 },
+      { wch: 25 }
+    ];
+    XLSX.utils.book_append_sheet(wb, wsTrend, 'Tren & SPM Servis');
+  }
+
   const fileName = `Rekap_Eksekutif_IPSRS_RSIG_${getTimestampString()}.xlsx`;
   XLSX.writeFile(wb, fileName);
 };

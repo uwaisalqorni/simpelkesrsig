@@ -21,12 +21,13 @@ class WorkOrders extends Base_Api_Controller {
 
         $user = $this->authenticate(true);
         $filters = [
+            'tenant_id'     => $this->get_tenant_id(),
             'status'        => $this->input->get('status'),
             'priority'      => $this->input->get('priority'),
             'equipment_id'  => $this->input->get('equipment_id'),
             'room_id'       => $this->input->get('room_id'),
             'technician_id' => $this->input->get('technician_id'),
-            'search'        => $this->input->get('search'),
+            'search'        => $this->input->get('search')
         ];
 
         // Jika user adalah ruangan, batasi list hanya ke ruangan miliknya jika tidak filter
@@ -132,6 +133,7 @@ class WorkOrders extends Base_Api_Controller {
 
         $ticket_number = $this->work_order_m->generate_ticket_number();
         $ticket_data = [
+            'tenant_id'            => $this->get_tenant_id(),
             'ticket_number'        => $ticket_number,
             'equipment_id'         => (int)$equipment_id,
             'reported_by_user_id'  => $user['id'],
@@ -324,6 +326,11 @@ class WorkOrders extends Base_Api_Controller {
             $this->json_response(false, 'Tiket tidak ditemukan.', null, 404);
         }
 
+        // Proteksi Ruangan: user role ruangan hanya boleh memverifikasi tiket unit miliknya
+        if ($user['role'] === 'ruangan' && !empty($ticket['room_id']) && $ticket['room_id'] != $user['room_id']) {
+            $this->json_response(false, 'Anda hanya berwenang memvalidasi alat medis di unit ruangan Anda.', null, 403);
+        }
+
         $input = $this->get_json_input();
         $is_accepted = isset($input['is_accepted']) ? (bool)$input['is_accepted'] : true;
         $signature_data = isset($input['signature_data']) ? $input['signature_data'] : null; // Base64 PNG
@@ -362,8 +369,13 @@ class WorkOrders extends Base_Api_Controller {
             ]);
 
             $this->log_audit('VERIFY_AND_CLOSE', 'work_orders', $id, 'Tiket perbaikan diverifikasi dan ditutup');
-            $this->json_response(true, 'Tiket perbaikan berhasil diverifikasi dan ditutup secara resmi.');
+            $this->json_response(true, 'Tiket perbaikan berhasil diverifikasi dan diserahterimakan secara resmi.');
         } else {
+            // Validasi: Catatan kendala wajib diisi saat menolak
+            if (empty($notes)) {
+                $this->json_response(false, 'Silakan tuliskan catatan kendala yang masih ditemukan agar teknisi dapat menindaklanjutinya.', null, 400);
+            }
+
             // Ditolak / belum normal -> kembalikan ke in_progress
             $update_data = [
                 'status'           => 'in_progress',
@@ -374,12 +386,12 @@ class WorkOrders extends Base_Api_Controller {
             $this->work_order_m->add_log([
                 'work_order_id'  => $id,
                 'technician_id'  => $user['id'],
-                'action_taken'   => 'Uji fungsi BELUM SESUAI oleh unit kerja (' . $user['full_name'] . '). Catatan penolakan: ' . $notes,
+                'action_taken'   => 'Uji fungsi dinyatakan BELUM SESUAI oleh unit kerja (' . $user['full_name'] . '). Catatan penolakan: ' . $notes,
                 'current_status' => 'in_progress'
             ]);
 
             $this->log_audit('REJECT_REOPEN', 'work_orders', $id, 'Hasil perbaikan ditolak unit: ' . $notes);
-            $this->json_response(true, 'Tiket dikembalikan ke teknisi untuk perbaikan lanjutan.');
+            $this->json_response(true, 'Tiket berhasil dikembalikan ke teknisi untuk perbaikan lanjutan.');
         }
     }
 

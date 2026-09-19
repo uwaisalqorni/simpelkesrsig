@@ -116,6 +116,12 @@ const routes = [
     meta: { requiresAuth: true, roles: ['admin'] }
   },
   {
+    path: '/tenants',
+    name: 'Tenants',
+    component: () => import('../views/tenants/TenantsView.vue'),
+    meta: { requiresAuth: true, roles: ['super_admin'] }
+  },
+  {
     path: '/:pathMatch(.*)*',
     redirect: '/'
   }
@@ -141,7 +147,7 @@ router.beforeEach((to, from, next) => {
     next({ name: 'Login', query: { redirect: to.fullPath } });
   } else if (to.meta.guestOnly && authStore.isAuthenticated) {
     next({ name: 'Dashboard' });
-  } else if (to.meta.roles && !to.meta.roles.includes(authStore.role)) {
+  } else if (to.meta.roles && !to.meta.roles.includes(authStore.role) && authStore.role !== 'super_admin') {
     // If role unauthorized, redirect to Dashboard
     next({ name: 'Dashboard' });
   } else {

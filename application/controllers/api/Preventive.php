@@ -21,6 +21,7 @@ class Preventive extends Base_Api_Controller {
 
         $user = $this->authenticate(true);
         $filters = [
+            'tenant_id'    => $this->get_tenant_id(),
             'status'       => $this->input->get('status'),
             'equipment_id' => $this->input->get('equipment_id'),
             'room_id'      => $this->input->get('room_id'),
@@ -102,9 +103,10 @@ class Preventive extends Base_Api_Controller {
         ];
 
         $data = [
+            'tenant_id'      => $this->get_tenant_id(),
             'equipment_id'   => (int)$input['equipment_id'],
             'scheduled_date' => $input['scheduled_date'],
-            'frequency'      => !empty($input['frequency']) ? $input['frequency'] : 'quarterly',
+            'frequency'      => !empty($input['frequency']) ? $input['frequency'] : '3_bulanan',
             'status'         => 'pending',
             'checklist_data' => json_encode($checklist),
             'notes'          => isset($input['notes']) ? trim($input['notes']) : null

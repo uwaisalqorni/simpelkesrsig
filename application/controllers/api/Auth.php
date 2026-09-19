@@ -41,7 +41,8 @@ class Auth extends Base_Api_Controller {
             'user_id'   => $user['id'],
             'username'  => $user['username'],
             'role'      => $user['role'],
-            'room_id'   => $user['room_id']
+            'room_id'   => $user['room_id'],
+            'tenant_id' => $user['tenant_id'] ?? 1
         ];
         $token = $this->jwt->encode($payload);
 

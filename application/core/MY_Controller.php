@@ -73,9 +73,10 @@ class Base_Api_Controller extends CI_Controller {
         }
 
         // Ambil data user terkini dari database
-        $this->db->select('u.id, u.username, u.full_name, u.role, u.room_id, u.is_active, r.name as room_name, r.code as room_code');
+        $this->db->select('u.id, u.username, u.full_name, u.role, u.room_id, u.tenant_id, u.is_active, r.name as room_name, r.code as room_code, t.name as tenant_name, t.code as tenant_code, t.logo_path as tenant_logo');
         $this->db->from('users u');
         $this->db->join('rooms r', 'r.id = u.room_id', 'left');
+        $this->db->join('tenants t', 't.id = u.tenant_id', 'left');
         $this->db->where('u.id', $payload['user_id']);
         $user = $this->db->get()->row_array();
 
@@ -91,11 +92,46 @@ class Base_Api_Controller extends CI_Controller {
     }
 
     /**
+     * Mendapatkan tenant_id aktif
+     * Jika super_admin, dapat memilih faskes tertentu via header 'X-Tenant-Id'
+     */
+    protected function get_tenant_id() {
+        if (!$this->current_user) {
+            return 1;
+        }
+        if ($this->current_user['role'] === 'super_admin') {
+            $header_tenant = $this->input->get_request_header('X-Tenant-Id', TRUE);
+            if (!empty($header_tenant) && is_numeric($header_tenant)) {
+                return (int)$header_tenant;
+            }
+            // Jika super_admin belum memilih, default ke 1 (RSIG) atau null untuk all
+            return 1;
+        }
+        return !empty($this->current_user['tenant_id']) ? (int)$this->current_user['tenant_id'] : 1;
+    }
+
+    /**
+     * Terapkan filter tenant pada query builder CodeIgniter
+     */
+    protected function apply_tenant_filter($table_alias = null) {
+        $tid = $this->get_tenant_id();
+        if (!is_null($tid)) {
+            $col = $table_alias ? "{$table_alias}.tenant_id" : 'tenant_id';
+            $this->db->where($col, $tid);
+        }
+    }
+
+    /**
      * Cek izin peran (Role Based Access Control)
      */
     protected function require_role($allowed_roles = []) {
         if (!$this->current_user) {
             $this->authenticate(true);
+        }
+
+        // Super Admin mewarisi semua izin administratif
+        if ($this->current_user['role'] === 'super_admin') {
+            return;
         }
 
         if (is_string($allowed_roles)) {
@@ -112,11 +148,13 @@ class Base_Api_Controller extends CI_Controller {
      */
     protected function log_audit($action, $table = null, $record_id = null, $details = null) {
         $user_id = $this->current_user ? $this->current_user['id'] : null;
+        $tenant_id = $this->get_tenant_id();
         if (is_array($details) || is_object($details)) {
             $details = json_encode($details);
         }
 
         $this->db->insert('audit_logs', [
+            'tenant_id'  => $tenant_id,
             'user_id'    => $user_id,
             'action'     => $action,
             'table_name' => $table,

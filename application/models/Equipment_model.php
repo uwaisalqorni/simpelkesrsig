@@ -11,6 +11,9 @@ class Equipment_model extends CI_Model {
         $this->db->join('(SELECT c1.equipment_id, c1.calibration_date, c1.valid_until, c1.certificate_number, c1.result as calibration_result FROM calibration_logs c1 INNER JOIN (SELECT equipment_id, MAX(id) as max_id FROM calibration_logs GROUP BY equipment_id) c2 ON c1.id = c2.max_id) cl', 'cl.equipment_id = e.id', 'left');
         $this->db->where('e.is_deleted', 0);
 
+        if (!empty($filters['tenant_id'])) {
+            $this->db->where('e.tenant_id', $filters['tenant_id']);
+        }
         if (!empty($filters['room_id'])) {
             $this->db->where('e.room_id', $filters['room_id']);
         }
@@ -40,6 +43,9 @@ class Equipment_model extends CI_Model {
         $this->db->from('medical_equipment e');
         $this->db->where('e.is_deleted', 0);
 
+        if (!empty($filters['tenant_id'])) {
+            $this->db->where('e.tenant_id', $filters['tenant_id']);
+        }
         if (!empty($filters['room_id'])) {
             $this->db->where('e.room_id', $filters['room_id']);
         }
