@@ -105,8 +105,8 @@ class Settings extends Base_Api_Controller {
         $current_settings = $this->setting_m->get_settings($tenant_id);
 
         $input = $this->get_json_input();
-        $bot_token = !empty($input['bot_token']) ? trim($input['bot_token']) : ($current_settings['telegram_bot_token'] ?? '');
-        $chat_id   = !empty($input['chat_id']) ? trim($input['chat_id']) : ($current_settings['telegram_chat_id'] ?? '');
+        $bot_token = isset($input['bot_token']) ? trim($input['bot_token']) : ($current_settings['telegram_bot_token'] ?? '');
+        $chat_id   = isset($input['chat_id']) ? trim($input['chat_id']) : ($current_settings['telegram_chat_id'] ?? '');
 
         if (empty($bot_token) || empty($chat_id)) {
             $this->json_response(false, 'Token Bot dan Chat ID Grup belum diisi. Silakan masukkan token dan ID grup terlebih dahulu.', null, 400);
