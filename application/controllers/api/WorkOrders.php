@@ -160,6 +160,20 @@ class WorkOrders extends Base_Api_Controller {
             'current_status' => 'reported'
         ]);
 
+        // Kirim Notifikasi Telegram Otomatis ke Grup Teknisi Faskes
+        try {
+            $this->load->library('Telegram_service');
+            $this->load->model('Room_model', 'room_m');
+            $room = !empty($equipment['room_id']) ? $this->room_m->find_by_id($equipment['room_id']) : ['name' => 'Unit Pelayanan'];
+            $notif_ticket = $ticket_data;
+            $notif_ticket['id'] = $insert_id;
+            $notif_ticket['complaint'] = $issue_description;
+            $notif_ticket['reporter_name'] = $user['full_name'];
+            $this->telegram_service->notify_ticket_created($notif_ticket, $equipment, $room, $ticket_data['tenant_id']);
+        } catch (Exception $e) {
+            log_message('error', 'Telegram notification error: ' . $e->getMessage());
+        }
+
         $this->log_audit('CREATE_TICKET', 'work_orders', $insert_id, "Tiket {$ticket_number} dilaporkan");
 
         $this->json_response(true, 'Tiket perbaikan berhasil dilaporkan dengan nomor ' . $ticket_number . '.', [
@@ -266,6 +280,18 @@ class WorkOrders extends Base_Api_Controller {
         if ($new_status === 'completed_technician') {
             // Jika teknisi menyatakan selesai, status alat diubah jadi operasional
             $this->equipment_m->update($ticket['equipment_id'], ['operational_status' => 'operasional']);
+
+            // Kirim Notifikasi Telegram bahwa alat siap diuji coba oleh unit ruangan
+            try {
+                $this->load->library('Telegram_service');
+                $this->load->model('Room_model', 'room_m');
+                $equipment = $this->equipment_m->find_by_id($ticket['equipment_id']);
+                $room = !empty($ticket['room_id']) ? $this->room_m->find_by_id($ticket['room_id']) : ['name' => 'Unit Pelayanan'];
+                $ticket['action_taken'] = trim($action_taken);
+                $this->telegram_service->notify_ticket_validation_needed($ticket, $equipment, $room, $this->current_user['full_name'], $ticket['tenant_id']);
+            } catch (Exception $e) {
+                log_message('error', 'Telegram validation notification error: ' . $e->getMessage());
+            }
         }
 
         $this->work_order_m->update($id, $update_data);
@@ -367,6 +393,17 @@ class WorkOrders extends Base_Api_Controller {
                 'action_taken'   => 'Uji fungsi dinyatakan NORMAL & serah terima divalidasi oleh unit kerja (' . $user['full_name'] . '). Tiket ditutup resmi.',
                 'current_status' => 'closed'
             ]);
+
+            // Kirim Notifikasi Telegram bahwa alat resmi operasional kembali
+            try {
+                $this->load->library('Telegram_service');
+                $this->load->model('Room_model', 'room_m');
+                $equipment = $this->equipment_m->find_by_id($ticket['equipment_id']);
+                $room = !empty($ticket['room_id']) ? $this->room_m->find_by_id($ticket['room_id']) : ['name' => 'Unit Pelayanan'];
+                $this->telegram_service->notify_ticket_resolved($ticket, $equipment, $room, $user['full_name'], $ticket['tenant_id']);
+            } catch (Exception $e) {
+                log_message('error', 'Telegram resolved notification error: ' . $e->getMessage());
+            }
 
             $this->log_audit('VERIFY_AND_CLOSE', 'work_orders', $id, 'Tiket perbaikan diverifikasi dan ditutup');
             $this->json_response(true, 'Tiket perbaikan berhasil diverifikasi dan diserahterimakan secara resmi.');

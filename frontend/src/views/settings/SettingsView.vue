@@ -169,6 +169,127 @@
             </div>
           </div>
         </div>
+
+        <!-- Card Integrasi Telegram Bot -->
+        <div class="bg-white rounded-2xl border border-sky-200/80 shadow-sm p-6 space-y-5">
+          <div class="flex items-center justify-between">
+            <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+              <div class="w-7 h-7 rounded-lg bg-sky-500 text-white flex items-center justify-center shadow-xs">
+                <Send class="w-4 h-4" />
+              </div>
+              <span>Integrasi Notifikasi Telegram Bot</span>
+            </h2>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 border border-sky-200">
+              Multi-Faskes
+            </span>
+          </div>
+
+          <p class="text-xs text-slate-500 leading-relaxed">
+            Kirimkan alert instan otomatis ke grup Telegram tim teknisi & kepala ruangan saat terjadi laporan kerusakan darurat, pemeliharaan selesai, atau sertifikat kalibrasi mendekati jatuh tempo.
+          </p>
+
+          <!-- Tutorial Singkat 3 Langkah -->
+          <div class="p-3.5 rounded-xl bg-sky-50/60 border border-sky-100 text-xs text-slate-700 space-y-1.5">
+            <div class="font-bold text-sky-900 flex items-center gap-1.5">
+              <HelpCircle class="w-3.5 h-3.5 text-sky-600" />
+              <span>Panduan Cepat Pengaturan Bot:</span>
+            </div>
+            <ol class="list-decimal list-inside space-y-1 text-[11px] text-slate-600 pl-1">
+              <li>Buka Telegram, cari akun resmi <b>@BotFather</b>, ketik <code>/newbot</code>, ikuti petunjuknya dan salin <b>API Token</b>.</li>
+              <li>Buat Grup Telegram teknisi faskes Anda, lalu masukkan bot tersebut ke dalam grup.</li>
+              <li>Masukkan bot pembantu <b>@userinfobot</b> atau <b>@getidsbot</b> ke grup untuk melihat <b>Chat ID Grup</b> (biasanya berawalan tanda minus, contoh: <code>-1001234567890</code>).</li>
+            </ol>
+          </div>
+
+          <div class="space-y-4">
+            <!-- Telegram Bot Token -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                Telegram Bot API Token
+              </label>
+              <div class="relative">
+                <input 
+                  v-model="form.telegram_bot_token" 
+                  :type="showToken ? 'text' : 'password'" 
+                  placeholder="Contoh: 1234567890:ABCdefGhIJKlmNoPQRsTUVwxyZ"
+                  class="w-full pl-4 pr-10 py-2.5 rounded-xl border border-slate-200 text-xs font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition"
+                />
+                <button 
+                  type="button" 
+                  @click="showToken = !showToken"
+                  class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 cursor-pointer"
+                  title="Tampilkan / Sembunyikan Token"
+                >
+                  <Eye v-if="!showToken" class="w-4 h-4" />
+                  <EyeOff v-else class="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            <!-- Telegram Chat ID Grup -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                Telegram Chat ID (ID Grup Teknisi Faskes)
+              </label>
+              <input 
+                v-model="form.telegram_chat_id" 
+                type="text" 
+                placeholder="Contoh: -1001928374820"
+                class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition"
+              />
+              <p class="text-[11px] text-slate-400 mt-1">ID grup Telegram tim elektromedis yang akan menerima notifikasi.</p>
+            </div>
+
+            <!-- Notification Event Toggles -->
+            <div class="pt-2 border-t border-slate-100">
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                Preferensi Jenis Notifikasi Aktif
+              </label>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+                <label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition">
+                  <input type="checkbox" v-model="form.telegram_notif_emergency" :true-value="1" :false-value="0" class="rounded text-sky-600 focus:ring-sky-500" />
+                  <span class="font-medium text-slate-700">🚨 Tiket Darurat (Emergency)</span>
+                </label>
+
+                <label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition">
+                  <input type="checkbox" v-model="form.telegram_notif_routine" :true-value="1" :false-value="0" class="rounded text-sky-600 focus:ring-sky-500" />
+                  <span class="font-medium text-slate-700">🛠️ Laporan Kerusakan Rutin</span>
+                </label>
+
+                <label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition">
+                  <input type="checkbox" v-model="form.telegram_notif_validation" :true-value="1" :false-value="0" class="rounded text-sky-600 focus:ring-sky-500" />
+                  <span class="font-medium text-slate-700">✍️ Permintaan Uji Fungsi Ruangan</span>
+                </label>
+
+                <label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition">
+                  <input type="checkbox" v-model="form.telegram_notif_calibration" :true-value="1" :false-value="0" class="rounded text-sky-600 focus:ring-sky-500" />
+                  <span class="font-medium text-slate-700">📅 Peringatan Kalibrasi BPFK</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Test Connection Button & Result -->
+            <div class="pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div v-if="telegramTestStatus" class="text-xs" :class="telegramTestStatus.success ? 'text-emerald-600 font-bold' : 'text-rose-600 font-medium'">
+                {{ telegramTestStatus.message }}
+              </div>
+              <div v-else class="text-[11px] text-slate-400">
+                Pastikan Bot sudah diundang ke grup sebelum melakukan pengujian.
+              </div>
+
+              <button 
+                type="button"
+                @click="runTelegramTest"
+                :disabled="settingStore.testingTelegram || !form.telegram_bot_token || !form.telegram_chat_id"
+                class="inline-flex items-center gap-2 px-4 py-2 bg-sky-500 hover:bg-sky-600 active:bg-sky-700 text-white text-xs font-bold rounded-xl shadow-xs transition disabled:opacity-50 cursor-pointer"
+              >
+                <Send v-if="!settingStore.testingTelegram" class="w-3.5 h-3.5" />
+                <Loader2 v-else class="w-3.5 h-3.5 animate-spin" />
+                <span>{{ settingStore.testingTelegram ? 'Menguji Koneksi...' : 'Test Kirim Pesan Telegram' }}</span>
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Kolom Kanan: Live Preview Kop & Identitas (5 Kolom) -->
@@ -260,7 +381,7 @@
 import { ref, reactive, onMounted } from 'vue';
 import { 
   Building2, Save, Loader2, CheckCircle2, AlertCircle, 
-  X, Sliders, Image, Upload, Eye, Sparkles 
+  X, Sliders, Image, Upload, Eye, EyeOff, Sparkles, Send, HelpCircle 
 } from 'lucide-vue-next';
 import { useSettingStore } from '../../stores/settingStore';
 import { validateFile } from '../../utils/fileValidation';
@@ -272,9 +393,17 @@ const form = reactive({
   hospital_subtitle: '',
   hospital_address: '',
   hospital_phone: '',
-  hospital_city: ''
+  hospital_city: '',
+  telegram_bot_token: '',
+  telegram_chat_id: '',
+  telegram_notif_emergency: 1,
+  telegram_notif_routine: 1,
+  telegram_notif_validation: 1,
+  telegram_notif_calibration: 1
 });
 
+const showToken = ref(false);
+const telegramTestStatus = ref(null);
 const logoFile = ref(null);
 const logoPreviewUrl = ref(null);
 const alertMessage = ref('');
@@ -292,6 +421,12 @@ function syncFormWithStore() {
   form.hospital_address = s.hospital_address || 'Jl. Hayam Wuruk No. 123, Gondanglegi, Malang';
   form.hospital_phone = s.hospital_phone || '(0341) 879222';
   form.hospital_city = s.hospital_city || 'Gondanglegi';
+  form.telegram_bot_token = s.telegram_bot_token || '';
+  form.telegram_chat_id = s.telegram_chat_id || '';
+  form.telegram_notif_emergency = s.telegram_notif_emergency !== undefined ? Number(s.telegram_notif_emergency) : 1;
+  form.telegram_notif_routine = s.telegram_notif_routine !== undefined ? Number(s.telegram_notif_routine) : 1;
+  form.telegram_notif_validation = s.telegram_notif_validation !== undefined ? Number(s.telegram_notif_validation) : 1;
+  form.telegram_notif_calibration = s.telegram_notif_calibration !== undefined ? Number(s.telegram_notif_calibration) : 1;
 }
 
 function onLogoSelected(e) {
@@ -328,6 +463,12 @@ async function saveSettings() {
   formData.append('hospital_address', form.hospital_address);
   formData.append('hospital_phone', form.hospital_phone);
   formData.append('hospital_city', form.hospital_city);
+  formData.append('telegram_bot_token', form.telegram_bot_token);
+  formData.append('telegram_chat_id', form.telegram_chat_id);
+  formData.append('telegram_notif_emergency', form.telegram_notif_emergency);
+  formData.append('telegram_notif_routine', form.telegram_notif_routine);
+  formData.append('telegram_notif_validation', form.telegram_notif_validation);
+  formData.append('telegram_notif_calibration', form.telegram_notif_calibration);
 
   if (logoFile.value) {
     formData.append('logo', logoFile.value);
@@ -336,12 +477,29 @@ async function saveSettings() {
   const result = await settingStore.updateSettings(formData);
   if (result.success) {
     alertSuccess.value = true;
-    alertMessage.value = 'Pengaturan Rumah Sakit berhasil diperbarui!';
+    alertMessage.value = 'Pengaturan Rumah Sakit & Notifikasi Telegram berhasil diperbarui!';
     resetLogoSelection();
     syncFormWithStore();
   } else {
     alertSuccess.value = false;
     alertMessage.value = result.message || 'Gagal menyimpan pengaturan.';
   }
+}
+
+async function runTelegramTest() {
+  telegramTestStatus.value = null;
+  if (!form.telegram_bot_token || !form.telegram_chat_id) {
+    telegramTestStatus.value = {
+      success: false,
+      message: 'Harap isi Token Bot dan Chat ID terlebih dahulu.'
+    };
+    return;
+  }
+
+  const result = await settingStore.testTelegram({
+    bot_token: form.telegram_bot_token,
+    chat_id: form.telegram_chat_id
+  });
+  telegramTestStatus.value = result;
 }
 </script>

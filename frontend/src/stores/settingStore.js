@@ -9,10 +9,17 @@ export const useSettingStore = defineStore('setting', {
       hospital_address: 'Jl. Hayam Wuruk No. 123, Gondanglegi, Malang',
       hospital_phone: '(0341) 879222',
       hospital_city: 'Gondanglegi',
-      hospital_logo: null
+      hospital_logo: null,
+      telegram_bot_token: '',
+      telegram_chat_id: '',
+      telegram_notif_emergency: 1,
+      telegram_notif_routine: 1,
+      telegram_notif_validation: 1,
+      telegram_notif_calibration: 1
     },
     loading: false,
     saving: false,
+    testingTelegram: false,
     error: null
   }),
 
@@ -22,6 +29,8 @@ export const useSettingStore = defineStore('setting', {
     hospitalAddress: (state) => state.settings?.hospital_address || 'Jl. Hayam Wuruk No. 123, Gondanglegi, Malang',
     hospitalPhone: (state) => state.settings?.hospital_phone || '(0341) 879222',
     hospitalCity: (state) => state.settings?.hospital_city || 'Gondanglegi',
+    telegramBotToken: (state) => state.settings?.telegram_bot_token || '',
+    telegramChatId: (state) => state.settings?.telegram_chat_id || '',
     hospitalLogoUrl: (state) => {
       if (state.settings?.hospital_logo) {
         return getUploadUrl(state.settings.hospital_logo);
@@ -73,6 +82,22 @@ export const useSettingStore = defineStore('setting', {
         return { success: false, message: this.error };
       } finally {
         this.saving = false;
+      }
+    },
+
+    async testTelegram(payload) {
+      this.testingTelegram = true;
+      try {
+        const res = await axiosClient.post('/settings/test-telegram', payload);
+        if (res.success) {
+          return { success: true, message: res.message };
+        }
+        throw new Error(res.message || 'Gagal menguji koneksi Telegram.');
+      } catch (err) {
+        const msg = err.response?.data?.message || err.message || 'Gagal menghubungi Telegram API.';
+        return { success: false, message: msg };
+      } finally {
+        this.testingTelegram = false;
       }
     }
   }

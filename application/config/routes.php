@@ -128,6 +128,7 @@ $route['api/audit-logs'] = 'api/auditlogs/index';
 $route['api/reports/recap'] = 'api/reports/recap';
 
 // API Settings (Hospital Configuration)
-$route['api/settings']        = 'api/settings/index';
-$route['api/settings/update'] = 'api/settings/update';
+$route['api/settings']               = 'api/settings/index';
+$route['api/settings/update']        = 'api/settings/update';
+$route['api/settings/test-telegram'] = 'api/settings/test_telegram';
 

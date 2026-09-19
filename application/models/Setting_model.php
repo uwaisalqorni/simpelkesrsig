@@ -18,7 +18,13 @@ class Setting_model extends CI_Model {
                     'hospital_address'  => !empty($tenant['address']) ? $tenant['address'] : '',
                     'hospital_phone'    => !empty($tenant['phone']) ? $tenant['phone'] : '',
                     'hospital_city'     => !empty($tenant['city']) ? $tenant['city'] : '',
-                    'hospital_logo'     => !empty($tenant['logo_path']) ? $tenant['logo_path'] : null
+                    'hospital_logo'     => !empty($tenant['logo_path']) ? $tenant['logo_path'] : null,
+                    'telegram_bot_token'        => null,
+                    'telegram_chat_id'          => null,
+                    'telegram_notif_emergency'  => 1,
+                    'telegram_notif_routine'    => 1,
+                    'telegram_notif_validation' => 1,
+                    'telegram_notif_calibration'=> 1
                 ];
             } else {
                 $default = [
@@ -28,7 +34,13 @@ class Setting_model extends CI_Model {
                     'hospital_address'  => '',
                     'hospital_phone'    => '',
                     'hospital_city'     => '',
-                    'hospital_logo'     => null
+                    'hospital_logo'     => null,
+                    'telegram_bot_token'        => null,
+                    'telegram_chat_id'          => null,
+                    'telegram_notif_emergency'  => 1,
+                    'telegram_notif_routine'    => 1,
+                    'telegram_notif_validation' => 1,
+                    'telegram_notif_calibration'=> 1
                 ];
             }
             $this->db->insert('app_settings', $default);
